@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Book } from '../../types';
 import { BookOpen, CheckCircle, Clock, PlayCircle, Download, FileText, Sparkles } from 'lucide-react';
+import { getBookDownloadUrl } from '../../services/api';
 
 export const UserShelf: React.FC = () => {
   const {
@@ -59,13 +60,7 @@ export const UserShelf: React.FC = () => {
 
   const handleDownloadCopy = (book: Book, format: 'EPUB' | 'PDF') => {
     if (book.ebookFile) {
-      const a = document.createElement('a');
-      a.href = book.ebookFile;
-      a.download = book.fileOriginalName || `${book.title.replace(/\s+/g, '_')}.${format.toLowerCase()}`;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      window.open(getBookDownloadUrl(book), '_blank');
       addToast('success', `Downloading genuine e-book file: "${book.title}"`);
       return;
     }

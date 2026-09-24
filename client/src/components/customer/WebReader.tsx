@@ -4,6 +4,7 @@ import {
   X, ChevronLeft, ChevronRight, Bookmark, List, Download,
   ExternalLink, FileText, BookOpen, Sparkles, ShoppingBag
 } from 'lucide-react';
+import { getBookPdfUrl, getBookDownloadUrl } from '../../services/api';
 
 export const WebReader: React.FC = () => {
   const {
@@ -286,7 +287,7 @@ export const WebReader: React.FC = () => {
                   {isPurchased ? (
                     <>
                       <a
-                        href={book.ebookFile}
+                        href={getBookPdfUrl(book)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-secondary"
@@ -297,8 +298,9 @@ export const WebReader: React.FC = () => {
                       </a>
 
                       <a
-                        href={book.ebookFile}
-                        download={book.fileOriginalName || `${book.title}.pdf`}
+                        href={getBookDownloadUrl(book)}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="btn btn-green"
                         style={{ padding: '0.35rem 0.75rem', fontSize: '0.775rem', textDecoration: 'none' }}
                         title="Download offline copy"
@@ -445,7 +447,7 @@ export const WebReader: React.FC = () => {
           {readerViewMode === 'pdf' && book.ebookFile ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', backgroundColor: '#2B2B2B' }}>
               <iframe
-                src={`${book.ebookFile}#toolbar=1&navpanes=1&scrollbar=1`}
+                src={`${getBookPdfUrl(book)}#toolbar=1&navpanes=1&scrollbar=1`}
                 title={`${book.title} PDF Document`}
                 style={{
                   width: '100%',

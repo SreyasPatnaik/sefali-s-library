@@ -243,6 +243,49 @@ router.post('/:id/reviews', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/books/:id/pdf
+// @desc    Stream e-book/PDF file for reading in browser
+router.get('/:id/pdf', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book || !book.ebookFile) {
+      return res.status(404).json({ message: 'No digital file uploaded for this title' });
+    }
+
+    const filePath = path.join(__dirname, '..', book.ebookFile);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'E-Book file not found on server storage. Please re-upload in Catalog Control.' });
+    }
+
+    res.setHeader('Content-Type', book.fileMimeType || 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(book.fileOriginalName || book.title + '.pdf')}"`);
+    res.sendFile(filePath);
+  } catch (err) {
+    res.status(500).json({ message: 'Error reading e-book file', error: err.message });
+  }
+});
+
+// @route   GET /api/books/:id/download
+// @desc    Download genuine e-book file
+router.get('/:id/download', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book || !book.ebookFile) {
+      return res.status(404).json({ message: 'No digital file available for download' });
+    }
+
+    const filePath = path.join(__dirname, '..', book.ebookFile);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'E-Book file not found on server storage.' });
+    }
+
+    const downloadName = book.fileOriginalName || `${book.title.replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`;
+    res.download(filePath, downloadName);
+  } catch (err) {
+    res.status(500).json({ message: 'Error downloading e-book file', error: err.message });
+  }
+});
+
 // @route   DELETE /api/books/:id
 // @desc    Delete e-book (Admin)
 router.delete('/:id', auth, adminOnly, async (req, res) => {

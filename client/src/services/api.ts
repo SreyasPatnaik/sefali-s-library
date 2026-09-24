@@ -1,6 +1,30 @@
 import { Book, User, Order, AdminStats, CustomerProfile } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
+const BACKEND_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_BASE = BACKEND_BASE ? `${BACKEND_BASE}/api` : '/api';
+
+export const getFileUrl = (pathOrUrl?: string): string => {
+  if (!pathOrUrl) return '';
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://') || pathOrUrl.startsWith('blob:') || pathOrUrl.startsWith('data:')) {
+    return pathOrUrl;
+  }
+  const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
+  return BACKEND_BASE ? `${BACKEND_BASE}${cleanPath}` : cleanPath;
+};
+
+export const getBookPdfUrl = (book: Book): string => {
+  if (book._id) {
+    return `${API_BASE}/books/${book._id}/pdf`;
+  }
+  return getFileUrl(book.ebookFile);
+};
+
+export const getBookDownloadUrl = (book: Book): string => {
+  if (book._id) {
+    return `${API_BASE}/books/${book._id}/download`;
+  }
+  return getFileUrl(book.ebookFile);
+};
 
 const getHeaders = (isFormData: boolean = false) => {
   const token = localStorage.getItem('sefali_token');

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Book } from '../../types';
 import { Search, Plus, Edit, Trash2, X, FileText, AlertTriangle, UploadCloud, Download, Loader2, Paperclip } from 'lucide-react';
-import { api } from '../../services/api';
+import { api, getFileUrl } from '../../services/api';
 
 export const CatalogControl: React.FC = () => {
   const { books, setBooks, refreshBooks, refreshAdminStats, addToast, user } = useApp();
@@ -257,7 +257,7 @@ export const CatalogControl: React.FC = () => {
                       <td style={{ padding: '1rem 0.5rem' }}>
                         {book.ebookFile ? (
                           <a
-                            href={book.ebookFile}
+                            href={getFileUrl(book.ebookFile)}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
@@ -588,7 +588,7 @@ export const CatalogControl: React.FC = () => {
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#57534E' }}>
                           {existingFileSize ? `${(existingFileSize / (1024 * 1024)).toFixed(2)} MB • ` : ''}
-                          <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#0284C7', textDecoration: 'underline' }}>
+                          <a href={getFileUrl(existingFileUrl)} target="_blank" rel="noopener noreferrer" style={{ color: '#0284C7', textDecoration: 'underline' }}>
                             Preview current file
                           </a>
                         </div>
