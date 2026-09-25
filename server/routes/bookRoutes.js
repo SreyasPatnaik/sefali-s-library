@@ -1,9 +1,34 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 const Book = require('../models/Book');
 const { auth, adminOnly } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+
+// GridFS Storage Helpers for permanent MongoDB cloud storage
+const saveFileToGridFS = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.buffer) return resolve(null);
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'ebooks' });
+    const uploadStream = bucket.openUploadStream(file.originalname, {
+      contentType: file.mimetype || 'application/pdf',
+    });
+    uploadStream.on('finish', () => resolve(uploadStream.id));
+    uploadStream.on('error', (err) => reject(err));
+    uploadStream.end(file.buffer);
+  });
+};
+
+const deleteFileFromGridFS = async (fileId) => {
+  if (!fileId) return;
+  try {
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'ebooks' });
+    await bucket.delete(new mongoose.Types.ObjectId(fileId));
+  } catch (err) {
+    console.warn('[GridFS] Could not delete file:', err.message);
+  }
+};
 
 const router = express.Router();
 
@@ -64,7 +89,6 @@ const parseBookFields = (body, file) => {
   };
 
   if (file) {
-    result.ebookFile = `/uploads/ebooks/${file.filename}`;
     result.fileOriginalName = file.originalname;
     result.fileSize = file.size;
     result.fileMimeType = file.mimetype;
@@ -150,6 +174,12 @@ router.post('/', auth, adminOnly, upload.single('ebookFile'), async (req, res) =
       return res.status(400).json({ message: 'Title, price, tag, and synopsis are required.' });
     }
 
+    if (req.file) {
+      const fileId = await saveFileToGridFS(req.file);
+      parsedData.fileId = fileId;
+      parsedData.ebookFile = `/api/books/stream/${fileId}`;
+    }
+
     const newBook = await Book.create(parsedData);
     res.status(201).json(newBook);
   } catch (err) {
@@ -169,18 +199,26 @@ router.put('/:id', auth, adminOnly, upload.single('ebookFile'), async (req, res)
 
     const updateData = parseBookFields(req.body, req.file);
 
-    // If new file uploaded and an old file exists, remove the obsolete file
-    if (req.file && existingBook.ebookFile) {
-      const oldFilePath = path.join(__dirname, '..', existingBook.ebookFile);
-      if (fs.existsSync(oldFilePath)) {
-        try {
-          fs.unlinkSync(oldFilePath);
-        } catch (fErr) {
-          console.warn('Could not remove old file:', fErr.message);
+    if (req.file) {
+      // Remove old file from GridFS if present
+      if (existingBook.fileId) {
+        await deleteFileFromGridFS(existingBook.fileId);
+      }
+      // Also remove old disk file if it was on disk
+      if (existingBook.ebookFile && existingBook.ebookFile.startsWith('/uploads')) {
+        const oldFilePath = path.join(__dirname, '..', existingBook.ebookFile);
+        if (fs.existsSync(oldFilePath)) {
+          try { fs.unlinkSync(oldFilePath); } catch (fErr) {}
         }
       }
-    } else if (!req.file && existingBook.ebookFile) {
+
+      // Save new file into MongoDB GridFS
+      const fileId = await saveFileToGridFS(req.file);
+      updateData.fileId = fileId;
+      updateData.ebookFile = `/api/books/stream/${fileId}`;
+    } else {
       // Retain existing file if no new file uploaded
+      updateData.fileId = existingBook.fileId;
       updateData.ebookFile = existingBook.ebookFile;
       updateData.fileOriginalName = existingBook.fileOriginalName;
       updateData.fileSize = existingBook.fileSize;
@@ -248,18 +286,39 @@ router.post('/:id/reviews', auth, async (req, res) => {
 router.get('/:id/pdf', async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
-    if (!book || !book.ebookFile) {
+    if (!book || (!book.fileId && !book.ebookFile)) {
       return res.status(404).json({ message: 'No digital file uploaded for this title' });
-    }
-
-    const filePath = path.join(__dirname, '..', book.ebookFile);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'E-Book file not found on server storage. Please re-upload in Catalog Control.' });
     }
 
     res.setHeader('Content-Type', book.fileMimeType || 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(book.fileOriginalName || book.title + '.pdf')}"`);
-    res.sendFile(filePath);
+
+    // 1. Stream from permanent MongoDB GridFS storage
+    if (book.fileId) {
+      try {
+        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'ebooks' });
+        const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(book.fileId));
+        downloadStream.on('error', (err) => {
+          console.error('[GridFS stream error]:', err.message);
+          if (!res.headersSent) {
+            res.status(404).json({ message: 'File not found in database storage. Please re-upload in Catalog Control.' });
+          }
+        });
+        return downloadStream.pipe(res);
+      } catch (gErr) {
+        console.warn('GridFS stream error, falling back to disk:', gErr.message);
+      }
+    }
+
+    // 2. Fallback to physical disk
+    if (book.ebookFile) {
+      const filePath = path.join(__dirname, '..', book.ebookFile);
+      if (fs.existsSync(filePath)) {
+        return res.sendFile(filePath);
+      }
+    }
+
+    res.status(404).json({ message: 'E-Book file not found on server storage. Please re-upload in Catalog Control.' });
   } catch (err) {
     res.status(500).json({ message: 'Error reading e-book file', error: err.message });
   }
@@ -270,17 +329,40 @@ router.get('/:id/pdf', async (req, res) => {
 router.get('/:id/download', async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
-    if (!book || !book.ebookFile) {
+    if (!book || (!book.fileId && !book.ebookFile)) {
       return res.status(404).json({ message: 'No digital file available for download' });
     }
 
-    const filePath = path.join(__dirname, '..', book.ebookFile);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'E-Book file not found on server storage.' });
+    const downloadName = book.fileOriginalName || `${book.title.replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`;
+    res.setHeader('Content-Type', book.fileMimeType || 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(downloadName)}"`);
+
+    // 1. Stream from permanent MongoDB GridFS storage
+    if (book.fileId) {
+      try {
+        const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'ebooks' });
+        const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(book.fileId));
+        downloadStream.on('error', (err) => {
+          console.error('[GridFS download error]:', err.message);
+          if (!res.headersSent) {
+            res.status(404).json({ message: 'File not found in database storage. Please re-upload in Catalog Control.' });
+          }
+        });
+        return downloadStream.pipe(res);
+      } catch (gErr) {
+        console.warn('GridFS download error, falling back to disk:', gErr.message);
+      }
     }
 
-    const downloadName = book.fileOriginalName || `${book.title.replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`;
-    res.download(filePath, downloadName);
+    // 2. Fallback to physical disk
+    if (book.ebookFile) {
+      const filePath = path.join(__dirname, '..', book.ebookFile);
+      if (fs.existsSync(filePath)) {
+        return res.download(filePath, downloadName);
+      }
+    }
+
+    res.status(404).json({ message: 'E-Book file not found on server storage. Please re-upload in Catalog Control.' });
   } catch (err) {
     res.status(500).json({ message: 'Error downloading e-book file', error: err.message });
   }
@@ -295,8 +377,13 @@ router.delete('/:id', auth, adminOnly, async (req, res) => {
       return res.status(404).json({ message: 'Book not found' });
     }
 
+    // Remove from MongoDB GridFS
+    if (book.fileId) {
+      await deleteFileFromGridFS(book.fileId);
+    }
+
     // Remove physical file from disk if present
-    if (book.ebookFile) {
+    if (book.ebookFile && book.ebookFile.startsWith('/uploads')) {
       const filePath = path.join(__dirname, '..', book.ebookFile);
       if (fs.existsSync(filePath)) {
         try {

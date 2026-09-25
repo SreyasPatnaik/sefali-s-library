@@ -34,6 +34,7 @@ const BookSchema = new mongoose.Schema({
   coverGradient: { type: String, default: 'linear-gradient(135deg, #1f2421 0%, #2d5a47 100%)' },
   coverColor: { type: String, default: '#2d5a47' },
   ebookFile: { type: String, default: '' },
+  fileId: { type: mongoose.Schema.Types.ObjectId, default: null },
   fileOriginalName: { type: String, default: '' },
   fileSize: { type: Number, default: 0 },
   fileMimeType: { type: String, default: '' },
