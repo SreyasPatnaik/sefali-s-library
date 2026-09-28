@@ -6,16 +6,14 @@ import { BookDetailsModal } from './components/customer/BookDetailsModal';
 import { AuthModal } from './components/customer/AuthModal';
 import { CheckoutModal } from './components/customer/CheckoutModal';
 import { UserShelf } from './components/customer/UserShelf';
-import { WebReader } from './components/customer/WebReader';
 import { ExecutiveDashboard } from './components/admin/ExecutiveDashboard';
 import { CatalogControl } from './components/admin/CatalogControl';
 import { OrderTracking } from './components/admin/OrderTracking';
-import { BookOpen } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const { activeMode, setActiveMode, activeTab, user } = useApp();
 
-  // Enforce strict role boundary: Non-admin users cannot access admin mode, and admins are strictly in admin portal
+  // Enforce strict role boundary
   useEffect(() => {
     if (user?.role === 'admin' && activeMode !== 'admin') {
       setActiveMode('admin');
@@ -24,24 +22,31 @@ const MainContent: React.FC = () => {
     }
   }, [activeMode, user, setActiveMode]);
 
-  const isAdminView = user?.role === 'admin';
+  const isAdminView = user?.role === 'admin' && activeMode === 'admin';
 
   return (
-    <main className="container" style={{ paddingTop: 'clamp(1.5rem, 3vw, 2.5rem)', minHeight: 'calc(100vh - 160px)' }}>
+    <main style={{ minHeight: 'calc(100vh - 180px)' }}>
       {isAdminView ? (
-        activeTab === 'dashboard' ? <ExecutiveDashboard /> :
-        activeTab === 'orders' ? <OrderTracking /> :
-        <CatalogControl />
+        <div className="container" style={{ paddingTop: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+          {activeTab === 'dashboard' ? <ExecutiveDashboard /> :
+           activeTab === 'orders' ? <OrderTracking /> :
+           <CatalogControl />}
+        </div>
       ) : (
-        activeTab === 'my-shelf' ? <UserShelf /> : <Storefront />
+        activeTab === 'my-shelf' ? (
+          <div className="container" style={{ paddingTop: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+            <UserShelf />
+          </div>
+        ) : (
+          <Storefront />
+        )
       )}
 
-      {/* Modals for customer interactions - preview, reader, and checkout are only accessible after login */}
-      {!isAdminView && user && (
+      {/* Modals for customer interactions */}
+      {!isAdminView && (
         <>
           <BookDetailsModal />
           <CheckoutModal />
-          <WebReader />
         </>
       )}
       <AuthModal />
@@ -56,38 +61,42 @@ export const App: React.FC = () => {
         <Header />
         <MainContent />
 
-        {/* Footer */}
+        {/* Studio Footer */}
         <footer style={{
           backgroundColor: '#FAF7EE',
-          borderTop: '1px solid #E7E3D4',
-          padding: '3rem 0',
-          marginTop: 'auto',
-          textAlign: 'center'
+          borderTop: '1px solid #EAE5D5',
+          padding: '4rem 0 2.5rem 0',
+          marginTop: 'auto'
         }}>
-          <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              backgroundColor: '#E8F2EC',
-              color: '#2E5A44',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto'
-            }}>
-              <BookOpen size={20} />
+          <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem', textAlign: 'center' }}>
+            <div>
+              <span className="font-serif" style={{ fontSize: '1.5rem', fontWeight: 600, letterSpacing: '0.12em', color: '#1C1917', textTransform: 'uppercase', display: 'block' }}>
+                THE SHEFALIS SPACE
+              </span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 600, letterSpacing: '0.2em', color: '#8C827A', textTransform: 'uppercase' }}>
+                DESIGN STUDIO
+              </span>
             </div>
 
-            <h2 className="font-serif" style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1C1917' }}>
-              Sefali's Library
-            </h2>
-
-            <p style={{ fontSize: '0.9rem', color: '#57534E', maxWidth: '520px' }}>
-              Editorial Digital Publishing House & Role-Based Administrative Control Center.
+            <p className="font-serif" style={{ fontSize: '1.05rem', fontStyle: 'italic', color: '#57534E', maxWidth: '460px', margin: 0 }}>
+              "Made with soul. With Passion and Meditation."
             </p>
 
-            <div style={{ width: '40px', height: '2px', backgroundColor: '#2E5A44', marginTop: '0.5rem' }} />
+            <div style={{ width: '40px', height: '1px', backgroundColor: '#D6D0C2', margin: '0.5rem 0' }} />
+
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#78716C' }}>
+              <span>Handmade</span>
+              <span>•</span>
+              <span>Art</span>
+              <span>•</span>
+              <span>Design</span>
+              <span>•</span>
+              <span>Bespoke Living</span>
+            </div>
+
+            <p style={{ fontSize: '0.75rem', color: '#A8A29E', marginTop: '1rem' }}>
+              © {new Date().getFullYear()} THE SHEFALIS SPACE. All rights reserved. Handcrafted contemporary studio.
+            </p>
           </div>
         </footer>
       </div>

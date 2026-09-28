@@ -16,14 +16,16 @@ export interface Chapter {
   pageOffset?: number;
 }
 
-export interface Book {
+export interface Product {
   _id: string;
   title: string;
   author: string;
-  edition: string;
+  category?: string;
+  edition?: string;
   price: number;
-  formats: ('EPUB' | 'PDF')[];
-  deliveryTag: string;
+  originalPrice?: number;
+  formats?: string[];
+  deliveryTag?: string;
   status: 'Published' | 'Draft';
   featured?: boolean;
   tag: string;
@@ -31,20 +33,31 @@ export interface Book {
   pageCount?: number;
   rating?: number;
   synopsis: string;
+  description?: string;
+  materials?: string;
+  dimensions?: string;
+  stockQuantity?: number;
+  inStock?: boolean;
+  image?: string;
+  images?: string[];
+  coverImage?: string;
   coverGradient?: string;
   coverColor?: string;
   ebookFile?: string;
   fileOriginalName?: string;
   fileSize?: number;
   fileMimeType?: string;
-  chapters: Chapter[];
+  chapters?: Chapter[];
   sampleChapter?: Chapter;
   reviews?: Review[];
 }
 
+export type Book = Product;
+
 export interface CartItem {
-  book: Book;
-  format: 'EPUB' | 'PDF';
+  book: Product;
+  format?: string;
+  quantity?: number;
 }
 
 export interface Bookmark {
@@ -67,8 +80,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   role: 'customer' | 'admin';
-  purchasedBooks: Book[] | string[];
+  purchasedBooks: Product[] | string[];
   readingProgress?: ReadingProgress[];
   bookmarks?: Bookmark[];
 }
@@ -81,7 +95,7 @@ export interface Order {
   bookTitle: string;
   amount: number;
   paymentMethod: string;
-  status: 'Paid' | 'Refunded' | 'Pending';
+  status: 'Paid' | 'Refunded' | 'Pending' | 'Processing' | 'Dispatched' | 'Delivered';
   createdAt: string;
   user?: any;
   book?: any;
@@ -91,12 +105,30 @@ export interface AdminStats {
   revenueYTD: number;
   totalOrders: number;
   registeredCustomers: number;
+  productsCatalogCount?: number;
   booksCatalogCount: number;
+  averageOrderValue?: number;
+  conversionRate?: string;
   monthlySales2026: {
     month: string;
     revenue: number;
     heightPercentage: number;
+    orders?: number;
     active?: boolean;
+  }[];
+  categoryBreakdown?: {
+    category: string;
+    revenue: number;
+    percentage: number;
+    piecesSold: number;
+  }[];
+  topSellingPieces?: {
+    title: string;
+    category: string;
+    unitsSold: number;
+    revenue: number;
+    stockRemaining: number;
+    rating: number;
   }[];
   recentTransactions: Order[];
 }

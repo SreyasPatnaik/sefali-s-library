@@ -53,6 +53,19 @@ export const api = {
     return res.json();
   },
 
+  async googleLogin(credentialPayload: { credential?: string; email?: string; name?: string; picture?: string }): Promise<{ token: string; user: User }> {
+    const res = await fetch(`${API_BASE}/auth/google`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(credentialPayload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Google authentication failed');
+    }
+    return res.json();
+  },
+
   async register(name: string, email: string, password: string): Promise<{ token: string; user: User }> {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
@@ -66,7 +79,7 @@ export const api = {
     return res.json();
   },
 
-  async registerAdmin(name: string, email: string, password: string, inviteCode: string): Promise<{ token: string; user: User }> {
+  async registerAdmin(name: string, email: string, password: string, inviteCode?: string): Promise<{ token: string; user: User }> {
     const res = await fetch(`${API_BASE}/auth/register-admin`, {
       method: 'POST',
       headers: getHeaders(),

@@ -1,15 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500..800;1,500..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 :root {
   --bg-main: #FAF7EE;
   --bg-card: #FDFBF7;
-  --bg-card-highlight: #FDF4C7;
-  --bg-banner: #FFF8DB;
+  --bg-butter: #F6E58D;
+  --bg-butter-light: #FAF0B4;
+  --bg-butter-dark: #E6CE60;
+  --bg-sand: #FAF7EE;
+  --bg-sand-darker: #EFE9D7;
   --accent-green: #2E5A44;
   --accent-green-hover: #224433;
   --accent-green-light: #E8F2EC;
-  --accent-yellow: #FEEFAD;
-  --accent-yellow-dark: #F5E080;
+  --accent-yellow: #F6E58D;
+  --accent-yellow-dark: #E6CE60;
+  --accent-gold: #B88E28;
   --text-primary: #1C1917;
   --text-secondary: #57534E;
   --text-muted: #78716C;
@@ -17,11 +21,11 @@
   --border-dark: #292524;
   --dark-card-bg: #1C1A17;
   --dark-card-border: #2E2B27;
-  --font-serif: 'Newsreader', 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', 'Newsreader', Georgia, serif;
+  --font-sans: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
   --shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.08);
   --shadow-dark: 0 16px 40px rgba(0, 0, 0, 0.25);
@@ -61,6 +65,10 @@ h1, h2, h3, h4, .font-serif {
   font-family: var(--font-serif);
   letter-spacing: -0.01em;
   font-weight: 600;
+}
+
+.font-editorial {
+  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
 }
 
 /* Scrollbar Styling */
@@ -809,18 +817,77 @@ body.modal-open { overflow: hidden; }
   .hero-price   { font-size: 1.5rem !important; }
 }
 
-/* ── Small phones (≤480px) ── */
-@media (max-width: 480px) {
-  .catalog-grid { grid-template-columns: 1fr !important; }
-  .admin-stats-grid { grid-template-columns: 1fr !important; }
+/* ===================================
+   3D AESTHETIC ENHANCEMENTS
+   =================================== */
 
-  .stats-bar > div { padding: 0.5rem 1rem !important; }
-
-  h1 { font-size: clamp(1.4rem, 7vw, 1.9rem) !important; }
-  h2 { font-size: clamp(1.2rem, 5.5vw, 1.55rem) !important; }
-
-  /* Reduce inner paddings */
-  section, .card { padding: 1.1rem !important; }
+.card-3d {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: perspective(1000px) translateZ(0);
 }
+
+.card-3d:hover {
+  transform: perspective(1000px) translateY(-6px) translateZ(8px);
+  box-shadow: 0 16px 36px rgba(28, 25, 23, 0.08), 0 4px 12px rgba(28, 25, 23, 0.04);
+}
+
+.medallion-3d {
+  background: radial-gradient(circle at 35% 35%, #FBF0B5 0%, #E6CE60 45%, #B88E28 100%);
+  box-shadow:
+    0 16px 32px rgba(184, 142, 40, 0.28),
+    0 4px 10px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -3px 6px rgba(110, 80, 15, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  animation: floatMedallion 6s ease-in-out infinite;
+}
+
+@keyframes floatMedallion {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.medallion-3d:hover {
+  transform: scale(1.04) translateY(-10px);
+  box-shadow:
+    0 22px 42px rgba(184, 142, 40, 0.38),
+    0 6px 14px rgba(0, 0, 0, 0.12),
+    inset 0 3px 6px rgba(255, 255, 255, 0.9),
+    inset 0 -3px 6px rgba(110, 80, 15, 0.4);
+}
+
+.btn-3d {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 0 #000000, 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #000000, 0 12px 20px rgba(0, 0, 0, 0.16);
+}
+
+.btn-3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #000000, 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-img-3d {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+}
+
+.product-card:hover .product-img-3d {
+  transform: scale(1.06) rotate(-0.5deg);
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.15));
+}
+
+.arch-3d {
+  position: relative;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+}
+
 
 

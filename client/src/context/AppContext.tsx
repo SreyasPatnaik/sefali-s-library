@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Book, User, Order, AdminStats, ReadingProgress, CartItem, Toast } from '../types';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Product, User, AdminStats, CartItem, Toast } from '../types';
 import { api } from '../services/api';
 import { ToastContainer } from '../components/common/ToastContainer';
 
@@ -8,26 +8,36 @@ interface AppContextType {
   setActiveMode: (mode: 'customer' | 'admin') => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  books: Book[];
-  setBooks: React.Dispatch<React.SetStateAction<Book[]>>;
+  isAdminUrl: boolean;
+  navigateToAdmin: () => void;
+  navigateToStorefront: () => void;
+  products: Product[];
+  books: Product[]; // backward compatibility
+  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  setBooks: React.Dispatch<React.SetStateAction<Product[]>>;
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  activeBookForDetails: Book | null;
-  setActiveBookForDetails: (book: Book | null) => void;
-  activeBookForReader: Book | null;
-  setActiveBookForReader: (book: Book | null) => void;
+  activeProductForDetails: Product | null;
+  setActiveProductForDetails: (product: Product | null) => void;
+  activeBookForDetails: Product | null; // backward compatibility
+  setActiveBookForDetails: (product: Product | null) => void;
+  activeBookForReader: Product | null;
+  setActiveBookForReader: (product: Product | null) => void;
   readerIsSample: boolean;
   setReaderIsSample: (isSample: boolean) => void;
-  checkoutBook: Book | null;
-  setCheckoutBook: (book: Book | null) => void;
+  checkoutProduct: Product | null;
+  setCheckoutProduct: (product: Product | null) => void;
+  checkoutBook: Product | null; // backward compatibility
+  setCheckoutBook: (product: Product | null) => void;
   authModalOpen: boolean;
   setAuthModalOpen: (open: boolean) => void;
   authModalTab: 'login' | 'register';
   setAuthModalTab: (tab: 'login' | 'register') => void;
   adminStats: AdminStats | null;
   cart: CartItem[];
-  addToCart: (book: Book, format?: 'EPUB' | 'PDF') => void;
-  removeFromCart: (bookId: string) => void;
+  addToCart: (product: Product, format?: string) => void;
+  updateCartQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
   clearCart: () => void;
   isCartDrawerOpen: boolean;
   setIsCartDrawerOpen: (open: boolean) => void;
@@ -35,24 +45,38 @@ interface AppContextType {
   addToast: (type: 'success' | 'error' | 'info' | 'warning', message: string) => void;
   removeToast: (id: string) => void;
   refreshAdminStats: () => Promise<void>;
+  refreshProducts: () => Promise<void>;
   refreshBooks: () => Promise<void>;
-  purchaseBook: (book: Book, paymentMethod: string, email: string) => Promise<void>;
+  purchaseProduct: (product: Product, paymentMethod: string, email: string) => Promise<void>;
+  purchaseBook: (product: Product, paymentMethod: string, email: string) => Promise<void>;
   purchaseCart: (paymentMethod: string, email: string) => Promise<void>;
+  handleGoogleLogin: (credentialPayload: { credential?: string; email?: string; name?: string; picture?: string }) => Promise<void>;
   logout: () => void;
   updateUserReadingProgress: (bookId: string, chapterNumber: number, lastPage: number, percentage: number) => void;
-  submitReview: (bookId: string, rating: number, comment: string) => Promise<void>;
+  submitReview: (productId: string, rating: number, comment: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const checkIsAdminUrl = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.location.pathname.includes('.admin') ||
+    window.location.hash.includes('.admin') ||
+    window.location.search.includes('.admin') ||
+    window.location.pathname.endsWith('/admin')
+  );
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [activeMode, setActiveMode] = useState<'customer' | 'admin'>('customer');
-  const [activeTab, setActiveTab] = useState<string>('storefront');
-  const [books, setBooks] = useState<Book[]>([]);
+  const [isAdminUrl, setIsAdminUrl] = useState<boolean>(checkIsAdminUrl);
+  const [activeMode, setActiveMode] = useState<'customer' | 'admin'>(() => checkIsAdminUrl() ? 'admin' : 'customer');
+  const [activeTab, setActiveTab] = useState<string>(() => checkIsAdminUrl() ? 'catalog' : 'storefront');
+  const [products, setProducts] = useState<Product[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
-      const saved = localStorage.getItem('sefali_cart');
+      const saved = localStorage.getItem('theshefalisspace_cart') || localStorage.getItem('sefali_cart');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -61,16 +85,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState<boolean>(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const [activeBookForDetails, setActiveBookForDetails] = useState<Book | null>(null);
-  const [activeBookForReader, setActiveBookForReader] = useState<Book | null>(null);
+  const [activeProductForDetails, setActiveProductForDetails] = useState<Product | null>(null);
+  const [activeBookForReader, setActiveBookForReader] = useState<Product | null>(null);
   const [readerIsSample, setReaderIsSample] = useState<boolean>(false);
-  const [checkoutBook, setCheckoutBook] = useState<Book | null>(null);
+  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState<boolean>(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
 
+  // Monitor URL changes for .admin secret entry
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const adminPresent = checkIsAdminUrl();
+      setIsAdminUrl(adminPresent);
+      if (adminPresent) {
+        setActiveMode('admin');
+      }
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
+
+  const navigateToAdmin = useCallback(() => {
+    if (!window.location.pathname.includes('.admin') && !window.location.hash.includes('.admin')) {
+      window.history.pushState({}, '', '/.admin');
+    }
+    setIsAdminUrl(true);
+    setActiveMode('admin');
+    setActiveTab('catalog');
+  }, []);
+
+  const navigateToStorefront = useCallback(() => {
+    if (window.location.pathname.includes('.admin') || window.location.hash.includes('.admin')) {
+      window.history.pushState({}, '', '/');
+    }
+    setIsAdminUrl(false);
+    setActiveMode('customer');
+    setActiveTab('storefront');
+  }, []);
+
   useEffect(() => {
     try {
+      localStorage.setItem('theshefalisspace_cart', JSON.stringify(cart));
       localStorage.setItem('sefali_cart', JSON.stringify(cart));
     } catch (e) {
       console.error(e);
@@ -81,9 +142,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const anyModalOpen =
       authModalOpen ||
-      !!activeBookForDetails ||
+      !!activeProductForDetails ||
       !!activeBookForReader ||
-      !!checkoutBook ||
+      !!checkoutProduct ||
       isCartDrawerOpen;
 
     if (anyModalOpen) {
@@ -94,7 +155,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       document.body.classList.remove('modal-open');
     };
-  }, [authModalOpen, activeBookForDetails, activeBookForReader, checkoutBook, isCartDrawerOpen]);
+  }, [authModalOpen, activeProductForDetails, activeBookForReader, checkoutProduct, isCartDrawerOpen]);
 
   const addToast = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -108,14 +169,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const refreshBooks = async () => {
+  const refreshProducts = async () => {
     try {
-      const fetchedBooks = await api.getBooks();
-      if (Array.isArray(fetchedBooks)) {
-        setBooks(fetchedBooks);
+      const fetched = await api.getBooks();
+      if (Array.isArray(fetched)) {
+        setProducts(fetched);
       }
     } catch (err) {
-      console.warn('Failed to load books:', err);
+      console.warn('Failed to load products:', err);
     }
   };
 
@@ -128,18 +189,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Restore authenticated user session on mount and route according to role
+  // Restore authenticated user session on mount
   useEffect(() => {
     const initSession = async () => {
-      await refreshBooks();
+      await refreshProducts();
       const token = localStorage.getItem('sefali_token');
       if (token) {
         try {
           const u = await api.getMe();
           setUser(u);
-          if (u.role === 'admin') {
+          if (u.role === 'admin' || checkIsAdminUrl()) {
             setActiveMode('admin');
-            setActiveTab('catalog'); // Default to Book Publishing & Catalog Control for Admin
+            setActiveTab('catalog');
             refreshAdminStats();
           } else {
             setActiveMode('customer');
@@ -148,116 +209,123 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch {
           localStorage.removeItem('sefali_token');
           setUser(null);
-          setActiveMode('customer');
-          setActiveTab('storefront');
+          if (checkIsAdminUrl()) {
+            setActiveMode('admin');
+          } else {
+            setActiveMode('customer');
+            setActiveTab('storefront');
+          }
         }
       }
     };
     initSession();
   }, []);
 
-  // When user is not logged in, immediately close any active details, reader, checkout, or cart
-  useEffect(() => {
-    if (!user) {
-      setActiveBookForDetails(null);
-      setActiveBookForReader(null);
-      setCheckoutBook(null);
-      setIsCartDrawerOpen(false);
-    }
-  }, [user]);
-
-  // Guarded setters that require authentication
-  const safeSetActiveBookForDetails = (book: Book | null) => {
-    if (book && !user) {
-      setAuthModalTab('login');
-      setAuthModalOpen(true);
-      addToast('info', 'Please sign in or register to preview books and view details.');
-      return;
-    }
-    setActiveBookForDetails(book);
+  // Safe setters for guest visitors (prompt login if needed)
+  const safeSetActiveProductForDetails = (product: Product | null) => {
+    setActiveProductForDetails(product);
   };
 
-  const safeSetActiveBookForReader = (book: Book | null) => {
-    if (book && !user) {
+  const safeSetCheckoutProduct = (product: Product | null) => {
+    if (product && !user) {
       setAuthModalTab('login');
       setAuthModalOpen(true);
-      addToast('info', 'Please sign in or register to preview or read books.');
+      addToast('info', 'Please sign in with Google or your account to complete checkout.');
       return;
     }
-    setActiveBookForReader(book);
-  };
-
-  const safeSetCheckoutBook = (book: Book | null) => {
-    if (book && !user) {
-      setAuthModalTab('login');
-      setAuthModalOpen(true);
-      addToast('info', 'Please sign in or register to purchase books.');
-      return;
-    }
-    setCheckoutBook(book);
+    setCheckoutProduct(product);
   };
 
   const safeSetIsCartDrawerOpen = (isOpen: boolean) => {
-    if (isOpen && !user) {
-      setAuthModalTab('login');
-      setAuthModalOpen(true);
-      addToast('info', 'Please sign in or register to view your shopping cart.');
-      return;
-    }
     setIsCartDrawerOpen(isOpen);
   };
 
-  const addToCart = (book: Book, format: 'EPUB' | 'PDF' = 'EPUB') => {
-    if (!user) {
-      setAuthModalTab('login');
-      setAuthModalOpen(true);
-      addToast('info', 'Please sign in or register to add books to your cart.');
-      return;
-    }
-    if (cart.some(item => item.book._id === book._id)) {
-      addToast('info', `"${book.title}" is already in your cart.`);
-      setIsCartDrawerOpen(true);
-      return;
-    }
-    setCart(prev => [...prev, { book, format }]);
-    addToast('success', `Added "${book.title}" to cart.`);
+  const addToCart = (product: Product, format: string = 'STANDARD') => {
+    setCart(prev => {
+      const existingIndex = prev.findIndex(item => item.book._id === product._id);
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex].quantity = (updated[existingIndex].quantity || 1) + 1;
+        addToast('success', `Increased quantity of "${product.title}" in your bag.`);
+        return updated;
+      }
+      addToast('success', `Added "${product.title}" to your studio bag.`);
+      return [...prev, { book: product, format, quantity: 1 }];
+    });
+    setIsCartDrawerOpen(true);
   };
 
-  const removeFromCart = (bookId: string) => {
-    setCart(prev => prev.filter(item => item.book._id !== bookId));
-    addToast('info', 'Item removed from cart.');
+  const updateCartQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart(prev =>
+      prev.map(item => item.book._id === productId ? { ...item, quantity } : item)
+    );
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.book._id !== productId));
+    addToast('info', 'Item removed from bag.');
   };
 
   const clearCart = () => {
     setCart([]);
   };
 
+  const handleGoogleLogin = async (credentialPayload: { credential?: string; email?: string; name?: string; picture?: string }) => {
+    try {
+      const res = await api.googleLogin(credentialPayload);
+      localStorage.setItem('sefali_token', res.token);
+      setUser(res.user);
+      setAuthModalOpen(false);
+
+      if (res.user.role === 'admin' && checkIsAdminUrl()) {
+        setActiveMode('admin');
+        setActiveTab('catalog');
+        await refreshAdminStats();
+      } else {
+        setActiveMode('customer');
+      }
+
+      addToast('success', `Signed in as ${res.user.name}`);
+    } catch (err: any) {
+      addToast('error', err.message || 'Google Sign-In failed');
+      throw err;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('sefali_token');
     setUser(null);
-    setActiveBookForDetails(null);
+    setActiveProductForDetails(null);
     setActiveBookForReader(null);
-    setCheckoutBook(null);
+    setCheckoutProduct(null);
     setIsCartDrawerOpen(false);
-    setActiveMode('customer');
-    setActiveTab('storefront');
+    if (checkIsAdminUrl()) {
+      setActiveMode('admin');
+    } else {
+      setActiveMode('customer');
+      setActiveTab('storefront');
+    }
     addToast('info', 'Signed out successfully.');
   };
 
-  const purchaseBook = async (book: Book, paymentMethod: string, email: string) => {
+  const purchaseProduct = async (product: Product, paymentMethod: string, email: string) => {
     try {
-      await api.createOrder(book._id, paymentMethod, email);
+      await api.createOrder(product._id, paymentMethod, email);
       if (user) {
         const u = await api.getMe();
         setUser(u);
       }
-      removeFromCart(book._id);
-      addToast('success', `Order confirmed! "${book.title}" unlocked in My Shelf.`);
+      removeFromCart(product._id);
+      addToast('success', `Order confirmed! "${product.title}" placed successfully.`);
       if (user?.role === 'admin') {
         await refreshAdminStats();
       }
     } catch (err: any) {
-      addToast('error', err.message || 'Purchase failed');
+      addToast('error', err.message || 'Order failed');
       throw err;
     }
   };
@@ -265,20 +333,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const purchaseCart = async (paymentMethod: string, email: string) => {
     if (cart.length === 0) return;
     try {
-      const bookIds = cart.map(item => item.book._id);
-      await api.createOrder(cart[0].book._id, paymentMethod, email, bookIds);
+      const productIds = cart.map(item => item.book._id);
+      await api.createOrder(cart[0].book._id, paymentMethod, email, productIds);
       if (user) {
         const u = await api.getMe();
         setUser(u);
       }
       clearCart();
       setIsCartDrawerOpen(false);
-      addToast('success', `Successfully purchased ${cart.length} book(s)! Unlocked in My Shelf.`);
+      addToast('success', `Thank you for your order! Purchased ${cart.length} studio piece(s).`);
       if (user?.role === 'admin') {
         await refreshAdminStats();
       }
     } catch (err: any) {
-      addToast('error', err.message || 'Cart checkout failed');
+      addToast('error', err.message || 'Checkout failed');
       throw err;
     }
   };
@@ -319,16 +387,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.updateProgress(bookId, chapterNumber, lastPage, percentage, percentage >= 100).catch(() => {});
   };
 
-  const submitReview = async (bookId: string, rating: number, comment: string) => {
+  const submitReview = async (productId: string, rating: number, comment: string) => {
     try {
-      const updatedBook = await api.addReview(bookId, rating, comment);
-      setBooks(prev => prev.map(b => b._id === updatedBook._id ? updatedBook : b));
-      if (activeBookForDetails && activeBookForDetails._id === updatedBook._id) {
-        setActiveBookForDetails(updatedBook);
+      const updatedProduct = await api.addReview(productId, rating, comment);
+      setProducts(prev => prev.map(p => p._id === updatedProduct._id ? updatedProduct : p));
+      if (activeProductForDetails && activeProductForDetails._id === updatedProduct._id) {
+        setActiveProductForDetails(updatedProduct);
       }
-      addToast('success', 'Your review has been published!');
+      addToast('success', 'Your studio review has been published!');
     } catch (err: any) {
-      addToast('error', err.message || 'Failed to post review');
+      addToast('error', err.message || 'Failed to submit review');
     }
   };
 
@@ -339,18 +407,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveMode,
         activeTab,
         setActiveTab,
-        books,
-        setBooks,
+        isAdminUrl,
+        navigateToAdmin,
+        navigateToStorefront,
+        products,
+        books: products,
+        setProducts,
+        setBooks: setProducts,
         user,
         setUser,
-        activeBookForDetails,
-        setActiveBookForDetails: safeSetActiveBookForDetails,
+        activeProductForDetails,
+        setActiveProductForDetails: safeSetActiveProductForDetails,
+        activeBookForDetails: activeProductForDetails,
+        setActiveBookForDetails: safeSetActiveProductForDetails,
         activeBookForReader,
-        setActiveBookForReader: safeSetActiveBookForReader,
+        setActiveBookForReader,
         readerIsSample,
         setReaderIsSample,
-        checkoutBook,
-        setCheckoutBook: safeSetCheckoutBook,
+        checkoutProduct,
+        setCheckoutProduct: safeSetCheckoutProduct,
+        checkoutBook: checkoutProduct,
+        setCheckoutBook: safeSetCheckoutProduct,
         authModalOpen,
         setAuthModalOpen,
         authModalTab,
@@ -358,6 +435,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         adminStats,
         cart,
         addToCart,
+        updateCartQuantity,
         removeFromCart,
         clearCart,
         isCartDrawerOpen,
@@ -366,9 +444,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addToast,
         removeToast,
         refreshAdminStats,
-        refreshBooks,
-        purchaseBook,
+        refreshProducts,
+        refreshBooks: refreshProducts,
+        purchaseProduct,
+        purchaseBook: purchaseProduct,
         purchaseCart,
+        handleGoogleLogin,
         logout,
         updateUserReadingProgress,
         submitReview

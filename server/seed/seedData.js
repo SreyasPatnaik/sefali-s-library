@@ -3,358 +3,346 @@ const Book = require('../models/Book');
 const User = require('../models/User');
 const Order = require('../models/Order');
 
-const initialBooks = [
+const initialProducts = [
   {
-    title: 'System Design Masterclass',
-    author: 'Shefali Jangid',
-    edition: 'Edition 2026',
-    price: 499,
-    formats: ['EPUB', 'PDF'],
-    deliveryTag: 'Instant Delivery',
+    title: 'Crimson Betta Art Piece',
+    author: 'Shefali Jangid Studio',
+    category: 'Art & Sculptures',
+    edition: 'Collector Edition 2026',
+    price: 2800,
+    originalPrice: 3400,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Free Studio Delivery',
     status: 'Published',
     featured: true,
-    tag: 'SYSTEMS',
-    readingMood: 'High Scalability & Microservices Architecture',
-    pageCount: 180,
-    rating: 4.9,
-    synopsis: 'A step-by-step practical guide covering scalable frontend system architecture, state management, and API design. Learn how enterprise engineering teams build resilient, low-latency web apps.',
-    coverGradient: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-    coverColor: '#1e293b',
+    tag: 'ART',
+    readingMood: 'Sculptural Art · Organic Fluidity',
+    pageCount: 1,
+    stockQuantity: 12,
+    inStock: true,
+    rating: 5.0,
+    synopsis: 'A mesmerizing hand-sculpted piece depicting the weightless fluidity of a Siamese fighting fish. Cast in crystal resin with luminous crimson mineral pigments.',
+    description: 'Each Betta art piece is sculpted and poured by hand in our studio. The flowing fins capture light in dynamic gradients, creating a contemplative aura of serenity and movement.',
+    materials: 'High-clarity optical resin, crimson mineral powders, brushed obsidian base',
+    dimensions: '24cm x 16cm x 12cm',
+    image: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%)',
+    coverColor: '#b91c1c',
     sampleChapter: {
       chapterNumber: 1,
-      title: 'Introduction to Distributed Frontend Systems',
-      subtitle: 'Fundamentals of Modular UI Architecture',
-      content: `Modern software development demands robust architectural foundations. When designing frontend systems at scale, isolation, predictability, and composability are non-negotiable.\n\nIn this introductory chapter, we examine how state boundaries allow teams to build micro-frontends without tight coupling or cascading regressions. By strictly isolating domain logic from visual presentation, frontend components remain easily testable and decoupled from underlying API changes.`,
-      keyTakeaway: 'Decouple view layers from global state to ensure modular testability and scalability.',
-      pageOffset: 12
-    },
-    chapters: [
-      {
-        chapterNumber: 1,
-        title: 'Introduction to Distributed Frontend Systems',
-        subtitle: 'Fundamentals of Modular UI Architecture',
-        content: `Modern software development demands robust architectural foundations. When designing frontend systems at scale, isolation, predictability, and composability are non-negotiable.\n\nIn this chapter, we examine how state boundaries allow teams to build micro-frontends without tight coupling or cascading regressions. By strictly isolating domain logic from visual presentation, frontend components remain easily testable and decoupled from underlying API changes.`,
-        keyTakeaway: 'Decouple view layers from global state to ensure modular testability and scalability.',
-        pageOffset: 12
-      },
-      {
-        chapterNumber: 2,
-        title: 'API Gateway & Event-Driven UI Patterns',
-        subtitle: 'Handling Real-Time Telemetry and WebSocket Streams',
-        content: `As backend microservices proliferate, consumer web clients require unified entry points. An API Gateway consolidates routing, authorization, rate limiting, and payload transformations.\n\nFor real-time applications, event streams push delta updates directly to subscribed view models. We discuss Optimistic UI updates, retry policies with backoff, and idempotent event consumers.`,
-        keyTakeaway: 'Implement idempotent event handlers to prevent duplicate render passes during retry intervals.',
-        pageOffset: 28
-      },
-      {
-        chapterNumber: 3,
-        title: 'Caching Strategies & Client Storage',
-        subtitle: 'IndexedDB, Service Workers, and Memory Stores',
-        content: `Latency is the single greatest performance thief in web applications. Stale-while-revalidate protocols combined with client-side IndexedDB caching allow applications to load instantaneously even on degraded network conditions.\n\nWe analyze cache invalidation policies, TTL strategies, and atomic storage transactions across browser tabs.`,
-        keyTakeaway: 'Always pair client storage with cryptographic checksums to detect corrupted cache payloads.',
-        pageOffset: 45
-      },
-      {
-        chapterNumber: 4,
-        title: 'State Architecture for Complex Applications',
-        subtitle: 'Isolation, Immutability, and Data Flows',
-        content: `When designing state architecture for modern applications, isolation and predictability are fundamental. By restricting direct state mutation and leveraging pure data flows, frontend components remain easily testable and decoupled from business logic.\n\nGlobal state should be treated as a read-only projection stream derived from single-source-of-truth events. Transient local UI state must be contained within visual component boundaries.`,
-        keyTakeaway: 'Keep component state local until global shared state is strictly required.',
-        pageOffset: 68
-      },
-      {
-        chapterNumber: 5,
-        title: 'Resilience Patterns & Circuit Breakers',
-        subtitle: 'Failing Gracefully Under Heavy Traffic',
-        content: `When high traffic bursts crash downstream microservices, frontend applications must fail gracefully rather than freezing or rendering white screens.\n\nCircuit breakers detect repeated API errors, opening the circuit to trigger fallback responses and cached UI snapshots.`,
-        keyTakeaway: 'Design fallback UI states for every external network dependency.',
-        pageOffset: 92
-      }
-    ]
+      title: 'Artisan Notes & Care',
+      subtitle: 'Preserving Resin Luminosity',
+      content: 'Wipe gently with a microfiber cloth. Avoid prolonged direct UV exposure to maintain the deep translucent crimson hue.',
+      keyTakeaway: 'Handcrafted individual piece with signed certificate of studio provenance.',
+      pageOffset: 1
+    }
   },
   {
-    title: 'The Silent Horizon',
-    author: 'Shefali J.',
-    edition: 'Edition 2026',
-    price: 399,
-    formats: ['EPUB'],
-    deliveryTag: 'Instant Delivery',
+    title: 'Emerald Textured Atelier Handbag',
+    author: 'The Shefalis Atelier',
+    category: 'Bags & Leather',
+    edition: 'Atelier Series 2026',
+    price: 3650,
+    originalPrice: 4500,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Express Insured Courier',
     status: 'Published',
     featured: true,
-    tag: 'FEATURED',
-    readingMood: 'Philosophical Engineering & Minimalism',
-    pageCount: 145,
+    tag: 'LEATHER',
+    readingMood: 'Luxury Craft · Vegetable-Tanned Leather',
+    pageCount: 1,
+    stockQuantity: 8,
+    inStock: true,
+    rating: 4.9,
+    synopsis: 'Structured silhouette crafted in embossed emerald Italian leather. Features brushed golden hardware, rolled top handle, and magnetic lock closure.',
+    description: 'Meticulously hand-stitched by master artisans, this emerald satchel embodies timeless architectural form and modern utility. Fully lined with sand cotton-canvas.',
+    materials: 'Embossed vegetable-tanned grain leather, solid brass clasp, natural cotton twill lining',
+    dimensions: '28cm x 20cm x 10cm (Drop: 12cm)',
+    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
+    coverColor: '#047857',
+    sampleChapter: {
+      chapterNumber: 1,
+      title: 'Leather Provenance & Care',
+      subtitle: 'Natural Aging & Conditioning',
+      content: 'Our vegetable-tanned leather will develop a rich, lustrous patina over time. Condition twice annually with natural beeswax balm.',
+      keyTakeaway: 'Includes custom organic linen dust bag and authenticity card.',
+      pageOffset: 1
+    }
+  },
+  {
+    title: 'Astral Studio Art Figurine',
+    author: 'Shefali Studio Editions',
+    category: 'Art & Sculptures',
+    edition: 'Limited Run of 50',
+    price: 4200,
+    originalPrice: 5000,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Insured Courier Delivery',
+    status: 'Published',
+    featured: true,
+    tag: 'COLLECTIBLE',
+    readingMood: 'Pop Art & Futuristic Nostalgia',
+    pageCount: 1,
+    stockQuantity: 15,
+    inStock: true,
     rating: 4.8,
-    synopsis: 'An editorial exploration of minimalist software design, deep work habits, and building timeless digital craft in an era of constant distraction.',
-    coverGradient: 'linear-gradient(135deg, #2d5a47 0%, #1f3a2e 100%)',
-    coverColor: '#2d5a47',
+    synopsis: 'A bold, hand-finished art toy celebrating celestial exploration and urban art toys culture. Matte polyurethane with glossy visor detailing.',
+    description: 'Designed as a dialogue between childhood cosmic imagination and contemporary sculptural design. Each figurine is individually numbered on the foot base.',
+    materials: 'High-density vinyl composite, polyurethane lacquer, magnetic helmet accents',
+    dimensions: '30cm x 15cm x 14cm',
+    image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+    coverColor: '#312e81',
     sampleChapter: {
       chapterNumber: 1,
-      title: 'The Noise of Complexity',
-      subtitle: 'Why Less Code is Our Most Valuable Asset',
-      content: `We live in an age of hyper-abstraction. Frameworks wrapped in build tools wrapped in container orchestration often conceal simple core problems.\n\nSimplicity requires deliberate restraint. Writing fewer lines of elegant, well-understood code reduces long-term maintenance debt and unlocks true clarity of thought.`,
-      keyTakeaway: 'Simplicity is not the absence of features, but the mastery of necessity.',
-      pageOffset: 10
-    },
-    chapters: [
-      {
-        chapterNumber: 1,
-        title: 'The Noise of Complexity',
-        subtitle: 'Why Less Code is Our Most Valuable Asset',
-        content: `We live in an age of hyper-abstraction. Frameworks wrapped in build tools wrapped in container orchestration often conceal simple core problems.\n\nSimplicity requires deliberate restraint. Writing fewer lines of elegant, well-understood code reduces long-term maintenance debt and unlocks true clarity of thought.`,
-        keyTakeaway: 'Simplicity is not the absence of features, but the mastery of necessity.',
-        pageOffset: 10
-      },
-      {
-        chapterNumber: 2,
-        title: 'Craftsmanship & Focus',
-        subtitle: 'Sustained Deep Work in Tech',
-        content: `Building exceptional software demands long stretches of unbroken focus. Context switching destroys cognitive momentum and introduces subtle logic bugs.\n\nCreate environments that respect flow state, reduce unnecessary notifications, and prioritize deep analytical thinking.`,
-        keyTakeaway: 'Guard your deep work hours as your highest engineering leverage.',
-        pageOffset: 35
-      }
-    ]
+      title: 'Collector Edition Certificate',
+      subtitle: 'Edition 24 / 50',
+      content: 'Shipped in custom foil-stamped presentation box with certificate of authenticity.',
+      keyTakeaway: 'Signed by lead designer Shefali Jangid.',
+      pageOffset: 1
+    }
   },
   {
-    title: 'Modern CSS Architecture',
-    author: 'Shefali J.',
-    edition: 'Edition 2026',
-    price: 299,
-    formats: ['EPUB'],
-    deliveryTag: 'Instant Delivery',
+    title: 'Ochre Ribbed Ceramic Vase',
+    author: 'The Shefalis Space',
+    category: 'Ceramics & Pottery',
+    edition: 'Studio Classic',
+    price: 1850,
+    originalPrice: 2200,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Fragile Boxed Delivery',
     status: 'Published',
     featured: false,
-    tag: 'CSS TRICKS',
-    readingMood: 'Design Systems & Layout Craftsmanship',
-    pageCount: 160,
+    tag: 'CERAMICS',
+    readingMood: 'Wabi-Sabi Stoneware',
+    pageCount: 1,
+    stockQuantity: 20,
+    inStock: true,
     rating: 4.9,
-    synopsis: 'Master modern CSS layout algorithms, CSS custom properties, container queries, fluid typography, and building scalably themed web design systems.',
-    coverGradient: 'linear-gradient(135deg, #1c1917 0%, #292524 100%)',
-    coverColor: '#1c1917',
-    sampleChapter: {
-      chapterNumber: 1,
-      title: 'Container Queries & Component Independence',
-      subtitle: 'Beyond Viewport Media Queries',
-      content: `For a decade, responsive design relied solely on viewport width. Container queries flip this paradigm by allowing UI elements to respond directly to their parent container size.\n\nThis empowers developers to craft truly self-contained components that adapt whether rendered inside a narrow sidebar or a full-width hero canvas.`,
-      keyTakeaway: 'Container queries enable true component-driven responsive design.',
-      pageOffset: 15
-    },
-    chapters: [
-      {
-        chapterNumber: 1,
-        title: 'Container Queries & Component Independence',
-        subtitle: 'Beyond Viewport Media Queries',
-        content: `For a decade, responsive design relied solely on viewport width. Container queries flip this paradigm by allowing UI elements to respond directly to their parent container size.\n\nThis empowers developers to craft truly self-contained components that adapt whether rendered inside a narrow sidebar or a full-width hero canvas.`,
-        keyTakeaway: 'Container queries enable true component-driven responsive design.',
-        pageOffset: 15
-      },
-      {
-        chapterNumber: 2,
-        title: 'Fluid Typography & Design Token Systems',
-        subtitle: 'Mathematical Scaling Without Breakpoints',
-        content: `Using CSS clamp() functions, layout dimensions and typography scale smoothly across screen resolutions without step-function media query jumps.`,
-        keyTakeaway: 'Mathematical fluid typography ensures visually balanced design hierarchies on any device.',
-        pageOffset: 40
-      }
-    ]
-  },
-  {
-    title: 'Python Guide',
-    author: 'Shefali J.',
-    edition: 'Edition 2026',
-    price: 449,
-    formats: ['EPUB', 'PDF'],
-    deliveryTag: 'Instant Delivery',
-    status: 'Published',
-    featured: false,
-    tag: 'PYTHON',
-    readingMood: 'Backend Performance & Data Engineering',
-    pageCount: 220,
-    rating: 4.7,
-    synopsis: 'Comprehensive handbook covering Python 3.12+ async concurrency, type annotations, memory optimization, and building high-throughput microservices.',
-    coverGradient: 'linear-gradient(135deg, #2e4a3e 0%, #1b3329 100%)',
-    coverColor: '#2e4a3e',
-    sampleChapter: {
-      chapterNumber: 1,
-      title: 'Asyncio Core Internals',
-      subtitle: 'Event Loops, Coroutines, and Non-blocking I/O',
-      content: `Python asyncio provides single-threaded concurrency through cooperative multitasking. Understanding event loop scheduling and task creation is essential for building scalable network servers.`,
-      keyTakeaway: 'Never execute CPU-bound blocking operations directly inside the main asyncio loop.',
-      pageOffset: 14
-    },
-    chapters: [
-      {
-        chapterNumber: 1,
-        title: 'Asyncio Core Internals',
-        subtitle: 'Event Loops, Coroutines, and Non-blocking I/O',
-        content: `Python asyncio provides single-threaded concurrency through cooperative multitasking. Understanding event loop scheduling and task creation is essential for building scalable network servers.`,
-        keyTakeaway: 'Never execute CPU-bound blocking operations directly inside the main asyncio loop.',
-        pageOffset: 14
-      }
-    ]
-  },
-  {
-    title: 'React Performance Secrets',
-    author: 'Shefali J.',
-    edition: 'Edition 2026',
-    price: 349,
-    formats: ['PDF'],
-    deliveryTag: 'Instant Delivery',
-    status: 'Draft',
-    featured: false,
-    tag: 'SYSTEMS',
-    readingMood: 'Render Tree Optimization & Memory Profiles',
-    pageCount: 130,
-    rating: 4.6,
-    synopsis: 'Advanced profiling techniques for React applications. Diagnose redundant re-renders, memory leaks, bundle split strategies, and custom hook memos.',
-    coverGradient: 'linear-gradient(135deg, #b45309 0%, #78350f 100%)',
+    synopsis: 'Wheel-thrown stoneware vase with tactile vertical grooves and matte warm ochre glaze. Ideal for botanical arrangements or solo sculpture.',
+    description: 'Thrown on a slow potter’s wheel in our Jaipur studio using local iron-rich clay. Fired twice at 1220°C for exceptional durability and water tightness.',
+    materials: 'Iron-rich stoneware clay, non-toxic matte mineral glaze',
+    dimensions: '22cm height, 14cm diameter',
+    image: 'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #78350f 0%, #b45309 100%)',
     coverColor: '#b45309',
     sampleChapter: {
       chapterNumber: 1,
-      title: 'Profiling Render Passes with React DevTools',
-      subtitle: 'Identifying Flamegraph Bottlenecks',
-      content: `Understanding why a component re-rendered is the first step in performance optimization. Use React DevTools profiler to measure commit durations and identify heavy re-renders.`,
-      keyTakeaway: 'Profile before optimizing—never introduce useMemo without measuring baseline performance.',
-      pageOffset: 8
-    },
-    chapters: [
-      {
-        chapterNumber: 1,
-        title: 'Profiling Render Passes with React DevTools',
-        subtitle: 'Identifying Flamegraph Bottlenecks',
-        content: `Understanding why a component re-rendered is the first step in performance optimization. Use React DevTools profiler to measure commit durations and identify heavy re-renders.`,
-        keyTakeaway: 'Profile before optimizing—never introduce useMemo without measuring baseline performance.',
-        pageOffset: 8
-      }
-    ]
+      title: 'Ceramic Care & Handling',
+      subtitle: 'Hand-wash Only',
+      content: 'Waterproof interior. Rinse with warm soapy water and air dry thoroughly.',
+      keyTakeaway: 'Each vessel exhibits natural variations in glaze depth and ribbing.',
+      pageOffset: 1
+    }
+  },
+  {
+    title: 'Zen Sandstone Incense Burner',
+    author: 'The Shefalis Space',
+    category: 'Studio Decor',
+    edition: 'Meditation Series',
+    price: 1290,
+    originalPrice: 1600,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Standard Delivery',
+    status: 'Published',
+    featured: false,
+    tag: 'DECOR',
+    readingMood: 'Ritual & Mindful Living',
+    pageCount: 1,
+    stockQuantity: 30,
+    inStock: true,
+    rating: 4.9,
+    synopsis: 'Minimalist carved sandstone vessel with dual brass incense pin and palo santo cradle for mindful daily grounding.',
+    description: 'Hand-hewn from natural dessert sandstone with smooth curved hollows designed to catch every trace of falling ash effortlessly.',
+    materials: 'Natural carved sandstone, solid spun brass',
+    dimensions: '18cm x 8cm x 3.5cm',
+    image: 'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b8?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b8?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #44403c 0%, #78716c 100%)',
+    coverColor: '#78716c',
+    sampleChapter: {
+      chapterNumber: 1,
+      title: 'Aromatherapy Guide',
+      subtitle: 'Mindful Morning Rituals',
+      content: 'Compatible with standard stick incense, dhoop cones, and sacred woods.',
+      keyTakeaway: 'Includes starter pack of artisanal sandalwood incense sticks.',
+      pageOffset: 1
+    }
+  },
+  {
+    title: 'Artisanal Butter Linen Throw',
+    author: 'The Shefalis Space',
+    category: 'Lifestyle & Living',
+    edition: 'Textile Collection',
+    price: 2450,
+    originalPrice: 3100,
+    formats: ['PHYSICAL', 'STANDARD'],
+    deliveryTag: 'Eco Gift Packaged',
+    status: 'Published',
+    featured: false,
+    tag: 'TEXTILES',
+    readingMood: 'Soft Living & Natural Fibers',
+    pageCount: 1,
+    stockQuantity: 14,
+    inStock: true,
+    rating: 4.7,
+    synopsis: 'Ultra-soft handwoven 100% Belgian flax linen throw blanket in soft warm butter yellow with hand-knotted eyelash fringe.',
+    description: 'Woven on traditional pit-looms by regional artisans. Pre-washed with natural river stones for a supple, lived-in drape that softens with every wash.',
+    materials: '100% Certified organic Belgian flax linen',
+    dimensions: '140cm x 190cm',
+    image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80'
+    ],
+    coverGradient: 'linear-gradient(135deg, #ca8a04 0%, #eab308 100%)',
+    coverColor: '#eab308',
+    sampleChapter: {
+      chapterNumber: 1,
+      title: 'Linen Care Instructions',
+      subtitle: 'Gentle Machine Wash',
+      content: 'Wash on gentle cycle in cool water. Tumble dry low or line dry in the breeze to preserve natural linen texture.',
+      keyTakeaway: 'Thermoregulating linen stays cool in summer and cozy in winter.',
+      pageOffset: 1
+    }
   }
 ];
 
 const seedData = async () => {
   try {
-    // Only seed if the database is empty (no books found)
-    const existingBooks = await Book.countDocuments();
-    if (existingBooks > 0) {
-      console.log('[Seed] Database already has data, skipping seed.');
+    const existingCount = await Book.countDocuments();
+    // If database already contains books with old book titles, clear and reseed with studio products
+    const sampleOld = await Book.findOne({ title: 'System Design Masterclass' });
+    if (existingCount > 0 && !sampleOld) {
+      console.log('[Seed] Database already initialized with studio collection.');
       return;
     }
 
-    console.log('[Seed] Empty database detected. Inserting initial book catalog...');
-    const insertedBooks = await Book.insertMany(initialBooks);
+    if (sampleOld) {
+      console.log('[Seed] Upgrading database catalog from library books to e-commerce studio products...');
+      await Book.deleteMany({});
+      await Order.deleteMany({});
+    }
 
-    const systemDesignBook = insertedBooks.find(b => b.title === 'System Design Masterclass');
-    const cssBook = insertedBooks.find(b => b.title === 'Modern CSS Architecture');
-    const pythonBook = insertedBooks.find(b => b.title === 'Python Guide');
+    console.log('[Seed] Seeding curated design studio products...');
+    const insertedProducts = await Book.insertMany(initialProducts);
+
+    const bettaArt = insertedProducts.find(p => p.title === 'Crimson Betta Art Piece');
+    const bagItem = insertedProducts.find(p => p.title === 'Emerald Textured Atelier Handbag');
+    const vaseItem = insertedProducts.find(p => p.title === 'Ochre Ribbed Ceramic Vase');
 
     // Create Admin User & Default Customer User
     const hashedAdminPassword = await bcrypt.hash('admin123', 10);
     const hashedCustomerPassword = await bcrypt.hash('password123', 10);
 
-    const adminUser = await User.create({
-      name: 'Shefali Jangid',
-      email: 'admin@sefali.library',
-      password: hashedAdminPassword,
-      role: 'admin'
-    });
+    let adminUser = await User.findOne({ email: 'admin@theshefalisspace.com' });
+    if (!adminUser) {
+      adminUser = await User.create({
+        name: 'Shefali Jangid',
+        email: 'admin@theshefalisspace.com',
+        password: hashedAdminPassword,
+        role: 'admin'
+      });
+    }
 
-    const customerUser = await User.create({
-      name: 'Priya Sharma',
-      email: 'priya.sharma@example.com',
-      password: hashedCustomerPassword,
-      role: 'customer',
-      purchasedBooks: [systemDesignBook._id, cssBook._id],
-      readingProgress: [
+    let customerUser = await User.findOne({ email: 'priya.sharma@example.com' });
+    if (!customerUser) {
+      customerUser = await User.create({
+        name: 'Priya Sharma',
+        email: 'priya.sharma@example.com',
+        password: hashedCustomerPassword,
+        role: 'customer',
+        purchasedBooks: [bettaArt._id, bagItem._id]
+      });
+    }
+
+    // Add initial product reviews
+    if (bettaArt && customerUser) {
+      bettaArt.reviews = [
         {
-          bookId: systemDesignBook._id,
-          chapterNumber: 5,
-          lastPage: 42,
-          percentage: 68,
-          completed: false
+          userId: customerUser._id,
+          userName: 'Priya Sharma',
+          rating: 5,
+          comment: 'The resin clarity and crimson fluidity are even more stunning in person! Truly a centerpiece for my living room.',
+          createdAt: new Date('2026-03-21T10:00:00')
+        }
+      ];
+      await bettaArt.save();
+    }
+
+    if (bagItem && customerUser) {
+      bagItem.reviews = [
+        {
+          userId: customerUser._id,
+          userName: 'Ananya Roy',
+          rating: 5,
+          comment: 'The emerald leather texture and gold hardware feel like luxury couture. Exceptional craftsmanship!',
+          createdAt: new Date('2026-03-22T14:20:00')
+        }
+      ];
+      await bagItem.save();
+    }
+
+    // Initial Orders
+    if (bettaArt && bagItem && vaseItem && customerUser) {
+      await Order.create([
+        {
+          orderNumber: '#SH-1042',
+          user: customerUser._id,
+          customerName: 'Priya Sharma',
+          customerEmail: 'priya.sharma@example.com',
+          book: bettaArt._id,
+          bookTitle: 'Crimson Betta Art Piece',
+          amount: 2800,
+          paymentMethod: 'UPI ID (priya@okhdfcbank)',
+          status: 'Paid',
+          createdAt: new Date('2026-03-22T14:30:00')
         },
         {
-          bookId: cssBook._id,
-          chapterNumber: 2,
-          lastPage: 160,
-          percentage: 100,
-          completed: true
+          orderNumber: '#SH-1041',
+          user: customerUser._id,
+          customerName: 'Ananya Roy',
+          customerEmail: 'ananya.roy@example.com',
+          book: bagItem._id,
+          bookTitle: 'Emerald Textured Atelier Handbag',
+          amount: 3650,
+          paymentMethod: 'Credit Card (Visa •••• 4242)',
+          status: 'Paid',
+          createdAt: new Date('2026-03-21T11:15:00')
+        },
+        {
+          orderNumber: '#SH-1040',
+          user: customerUser._id,
+          customerName: 'Karan Verma',
+          customerEmail: 'karan.v@example.com',
+          book: vaseItem._id,
+          bookTitle: 'Ochre Ribbed Ceramic Vase',
+          amount: 1850,
+          paymentMethod: 'UPI QR Code',
+          status: 'Paid',
+          createdAt: new Date('2026-03-20T09:45:00')
         }
-      ]
-    });
+      ]);
+    }
 
-    // Add initial reviews to books
-    systemDesignBook.reviews = [
-      {
-        userId: customerUser._id,
-        userName: 'Priya Sharma',
-        rating: 5,
-        comment: 'Must-read for staff engineers! The chapter on distributed circuit breakers saved our web client during peak deployment.',
-        createdAt: new Date('2026-03-21T10:00:00')
-      },
-      {
-        userId: adminUser._id,
-        userName: 'Vikram Seth',
-        rating: 5,
-        comment: 'Extremely clear breakdown of state architecture and client caching protocols.',
-        createdAt: new Date('2026-03-18T14:20:00')
-      }
-    ];
-    systemDesignBook.rating = 5.0;
-    await systemDesignBook.save();
-
-    cssBook.reviews = [
-      {
-        userId: customerUser._id,
-        userName: 'Aarav Mehta',
-        rating: 5,
-        comment: 'Container queries section changed how our design system components are constructed!',
-        createdAt: new Date('2026-03-20T16:45:00')
-      }
-    ];
-    cssBook.rating = 5.0;
-    await cssBook.save();
-
-    // Create Initial Orders
-    await Order.create([
-      {
-        orderNumber: '#1042',
-        user: customerUser._id,
-        customerName: 'Priya Sharma',
-        customerEmail: 'priya.sharma@example.com',
-        book: systemDesignBook._id,
-        bookTitle: 'System Design Masterclass',
-        amount: 499,
-        paymentMethod: 'UPI ID (priya@upi)',
-        status: 'Paid',
-        createdAt: new Date('2026-03-22T14:30:00')
-      },
-      {
-        orderNumber: '#1041',
-        user: customerUser._id,
-        customerName: 'Aarav Mehta',
-        customerEmail: 'aarav.mehta@example.com',
-        book: cssBook._id,
-        bookTitle: 'Modern CSS Architecture',
-        amount: 299,
-        paymentMethod: 'Credit Card',
-        status: 'Paid',
-        createdAt: new Date('2026-03-21T11:15:00')
-      },
-      {
-        orderNumber: '#1040',
-        user: customerUser._id,
-        customerName: 'Karan Verma',
-        customerEmail: 'karan.v@example.com',
-        book: pythonBook._id,
-        bookTitle: 'Python Guide',
-        amount: 449,
-        paymentMethod: 'Netbanking',
-        status: 'Paid',
-        createdAt: new Date('2026-03-20T09:45:00')
-      }
-    ]);
-
-    console.log('[Seed] Database successfully seeded with books, users, and orders!');
-    console.log('[Seed] Admin login:    admin@sefali.library / admin123');
-    console.log('[Seed] Customer login: priya.sharma@example.com / password123');
+    console.log('[Seed] Design Studio database successfully populated!');
+    console.log('[Seed] Admin Credentials: admin@theshefalisspace.com / admin123 (or access via URL ".admin")');
   } catch (err) {
     console.error('[Seed] Error seeding data:', err);
   }

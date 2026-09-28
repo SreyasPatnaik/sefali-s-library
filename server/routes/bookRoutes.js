@@ -32,9 +32,9 @@ const deleteFileFromGridFS = async (fileId) => {
 
 const router = express.Router();
 
-// Helper to parse multipart or JSON book fields
+// Helper to parse multipart or JSON product/book fields
 const parseBookFields = (body, file) => {
-  let formats = ['EPUB', 'PDF'];
+  let formats = ['PHYSICAL', 'STANDARD'];
   if (body.formats) {
     if (Array.isArray(body.formats)) {
       formats = body.formats;
@@ -65,26 +65,46 @@ const parseBookFields = (body, file) => {
     }
   }
 
+  let images = [];
+  if (body.images) {
+    if (Array.isArray(body.images)) images = body.images;
+    else if (typeof body.images === 'string') {
+      try { images = JSON.parse(body.images); } catch { images = [body.images]; }
+    }
+  }
+  if (body.image && !images.includes(body.image)) {
+    images.unshift(body.image);
+  }
+
   const result = {
     title: body.title,
-    author: body.author || 'Shefali Jangid',
+    author: body.author || 'Shefali Jangid Studio',
+    category: body.category || 'Handmade & Design',
     price: Number(body.price),
+    originalPrice: Number(body.originalPrice) || (Number(body.price) ? Math.round(Number(body.price) * 1.25) : 0),
     formats,
-    tag: (body.tag || 'SYSTEMS').toUpperCase(),
-    synopsis: body.synopsis,
-    edition: body.edition || 'Edition 2026',
+    tag: (body.tag || body.category || 'COLLECTION').toUpperCase(),
+    synopsis: body.synopsis || body.description || '',
+    description: body.description || body.synopsis || '',
+    materials: body.materials || 'Handcrafted Studio Materials',
+    dimensions: body.dimensions || 'Standard Studio Dimensions',
+    stockQuantity: Number(body.stockQuantity) || 20,
+    inStock: body.inStock !== false && body.inStock !== 'false',
+    image: body.image || (images.length > 0 ? images[0] : ''),
+    images: images,
+    edition: body.edition || 'Studio Collection 2026',
     status: body.status || 'Published',
-    readingMood: body.readingMood || 'High Scalability Architecture',
-    pageCount: Number(body.pageCount) || 180,
+    readingMood: body.readingMood || 'Handmade · Art · Design',
+    pageCount: Number(body.pageCount) || 1,
     coverGradient: body.coverGradient || 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
     coverColor: body.coverColor || '#1e293b',
     chapters,
     sampleChapter: sampleChapter || {
       chapterNumber: 1,
-      title: 'Sample Chapter',
-      subtitle: 'Preview Content',
-      content: body.synopsis || '',
-      keyTakeaway: 'Sample takeaway note.'
+      title: 'Studio Details & Provenance',
+      subtitle: 'Artisanal Craftsmanship',
+      content: body.synopsis || body.description || '',
+      keyTakeaway: 'Handcrafted with intentional design in our private studio.'
     }
   };
 
