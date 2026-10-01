@@ -347,18 +347,24 @@ export const ExecutiveDashboard: React.FC = () => {
           )}
 
           {/* Quick Insights Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
+            gap: '0.85rem',
+            marginTop: '1.5rem',
+            paddingTop: '1rem'
+          }}>
             <div style={{ backgroundColor: '#26231F', padding: '0.85rem', borderRadius: '10px', border: '1px solid #36322D' }}>
               <span style={{ fontSize: '0.7rem', color: '#A8A29E', textTransform: 'uppercase' }}>Highest Earning</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#F6E58D', marginTop: '2px' }}>May 2026 (₹54.9k)</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#F6E58D', marginTop: '2px' }}>May 2026 (₹54.9k)</div>
             </div>
             <div style={{ backgroundColor: '#26231F', padding: '0.85rem', borderRadius: '10px', border: '1px solid #36322D' }}>
               <span style={{ fontSize: '0.7rem', color: '#A8A29E', textTransform: 'uppercase' }}>Monthly Avg.</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFFFFF', marginTop: '2px' }}>₹37,280 / mo</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', marginTop: '2px' }}>₹37,280 / mo</div>
             </div>
             <div style={{ backgroundColor: '#26231F', padding: '0.85rem', borderRadius: '10px', border: '1px solid #36322D' }}>
               <span style={{ fontSize: '0.7rem', color: '#A8A29E', textTransform: 'uppercase' }}>Fulfillment Health</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#4ADE80', marginTop: '2px' }}>99.4% On Time</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#4ADE80', marginTop: '2px' }}>99.4% On Time</div>
             </div>
           </div>
         </div>

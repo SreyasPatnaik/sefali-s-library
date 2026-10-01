@@ -58,11 +58,11 @@ export const OrderTracking: React.FC = () => {
       {/* 3 Architecture Feature Cards */}
       <div className="admin-info-cards-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1.25rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+        gap: '1rem',
         marginBottom: '2rem'
       }}>
-        <div className="card" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4' }}>
+        <div className="card-3d" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4', borderRadius: '14px' }}>
           <div style={{ color: '#2E5A44', marginBottom: '0.5rem' }}>
             <FileText size={22} />
           </div>
@@ -74,7 +74,7 @@ export const OrderTracking: React.FC = () => {
           </p>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4' }}>
+        <div className="card-3d" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4', borderRadius: '14px' }}>
           <div style={{ color: '#2E5A44', marginBottom: '0.5rem' }}>
             <Tag size={22} />
           </div>
@@ -86,7 +86,7 @@ export const OrderTracking: React.FC = () => {
           </p>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4' }}>
+        <div className="card-3d" style={{ padding: '1.25rem', backgroundColor: '#FAF7EE', border: '1px solid #E7E3D4', borderRadius: '14px' }}>
           <div style={{ color: '#2E5A44', marginBottom: '0.5rem' }}>
             <User size={22} />
           </div>
@@ -94,24 +94,26 @@ export const OrderTracking: React.FC = () => {
             Customer Profiles
           </h4>
           <p style={{ fontSize: '0.825rem', color: '#57534E', lineHeight: 1.4, margin: 0 }}>
-            Interactive drawer displaying user activity, total spent, and purchased book history.
+            Interactive drawer displaying user activity, total spent, and purchased product history.
           </p>
         </div>
       </div>
 
       {/* Main Orders Log Table Box */}
-      <div style={{
+      <div className="card-3d" style={{
         backgroundColor: '#FFFFFF',
         border: '1px solid #E7E3D4',
         borderRadius: '16px',
-        padding: '1.75rem',
+        padding: '1.5rem',
         boxShadow: 'var(--shadow-subtle)'
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '1.5rem'
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem'
         }}>
           <h3 className="font-serif" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
             Live Transaction Logs ({orders.length})
@@ -125,13 +127,14 @@ export const OrderTracking: React.FC = () => {
           </button>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        {/* Desktop Table View */}
+        <div className="desktop-catalog-table" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #E7E3D4', color: '#78716C', fontSize: '0.775rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Order #</th>
                 <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Customer Email</th>
-                <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>E-Book Title</th>
+                <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Product Title</th>
                 <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Amount</th>
                 <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Payment Method</th>
                 <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Status</th>
@@ -160,15 +163,15 @@ export const OrderTracking: React.FC = () => {
                     <td style={{ padding: '1rem 0.5rem', fontWeight: 700, color: '#2E5A44' }}>
                       ₹{order.amount}
                     </td>
-                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.825rem', color: '#78716C' }}>
+                    <td style={{ padding: '1rem 0.5rem', fontSize: '0.825rem', color: '#57534E' }}>
                       {order.paymentMethod}
                     </td>
                     <td style={{ padding: '1rem 0.5rem' }}>
                       <button
                         onClick={() => handleToggleOrderStatus(order._id, order.status)}
                         className={`badge ${order.status === 'Paid' ? 'badge-green' : 'badge-yellow'}`}
-                        style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-                        title="Click to toggle status (Paid / Refunded)"
+                        style={{ cursor: 'pointer', border: 'none' }}
+                        title="Click to toggle Paid/Refunded"
                       >
                         {order.status}
                       </button>
@@ -176,22 +179,22 @@ export const OrderTracking: React.FC = () => {
                     <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
                       <button
                         onClick={() => {
-                          const cust = customers.find(c => c.email === order.customerEmail) || {
-                            id: 'c-temp',
-                            name: order.customerName || order.customerEmail.split('@')[0],
-                            email: order.customerEmail,
-                            createdAt: new Date().toLocaleDateString(),
-                            purchasedBooksCount: 1,
-                            totalSpent: order.amount,
-                            orders: [order],
-                            status: 'Active'
-                          };
-                          setSelectedCustomer(cust);
+                          const profile = customers.find(c => c.email === order.customerEmail);
+                          if (profile) setSelectedCustomer(profile);
                         }}
-                        className="btn btn-secondary"
-                        style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#2E5A44',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '0.825rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem'
+                        }}
                       >
-                        Profile <ChevronRight size={14} />
+                        View <ChevronRight size={14} />
                       </button>
                     </td>
                   </tr>
@@ -199,6 +202,47 @@ export const OrderTracking: React.FC = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="mobile-catalog-cards" style={{ display: 'none', flexDirection: 'column', gap: '0.85rem' }}>
+          {orders.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#78716C' }}>
+              No orders logged yet.
+            </div>
+          ) : (
+            orders.map(order => (
+              <div
+                key={order._id || order.orderNumber}
+                style={{
+                  backgroundColor: '#FAF7EE',
+                  border: '1px solid #EAE5D5',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.4rem'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: '#1C1917', fontSize: '0.9rem' }}>{order.orderNumber}</span>
+                  <button
+                    onClick={() => handleToggleOrderStatus(order._id, order.status)}
+                    className={`badge ${order.status === 'Paid' ? 'badge-green' : 'badge-yellow'}`}
+                    style={{ cursor: 'pointer', border: 'none', fontSize: '0.68rem' }}
+                  >
+                    {order.status}
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1C1917' }}>{order.bookTitle}</div>
+                <div style={{ fontSize: '0.78rem', color: '#78716C' }}>{order.customerEmail}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.3rem', paddingTop: '0.3rem', borderTop: '1px solid #EAE5D5' }}>
+                  <span style={{ fontWeight: 700, color: '#2E5A44' }}>₹{order.amount}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#8C827A' }}>{order.paymentMethod}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

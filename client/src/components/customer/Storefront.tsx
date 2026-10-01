@@ -61,26 +61,23 @@ export const Storefront: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem', paddingBottom: '4rem' }}>
+    <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2.5rem, 5vw, 4rem)', paddingBottom: '4rem', paddingTop: 'clamp(1rem, 2.5vw, 2rem)' }}>
 
       {/* ── SECTION 1: SPLIT HERO (Matches Screenshot 1) ── */}
       <section style={{
         width: '100%',
-        borderRadius: '0px',
+        borderRadius: '16px',
         overflow: 'hidden',
         border: '1px solid #EAE5D4',
-        boxShadow: '0 8px 32px rgba(28, 25, 23, 0.03)'
+        boxShadow: '0 12px 36px rgba(28, 25, 23, 0.05)',
+        backgroundColor: '#F6E58D'
       }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          minHeight: '520px'
-        }}>
+        <div className="hero-split-grid">
 
           {/* Left Side: Soft Warm Butter Yellow */}
           <div style={{
             backgroundColor: '#F6E58D',
-            padding: 'clamp(2.5rem, 5vw, 4.5rem)',
+            padding: 'clamp(1.75rem, 4.5vw, 4rem)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -98,12 +95,12 @@ export const Storefront: React.FC = () => {
             </div>
 
             <h1 className="font-editorial" style={{
-              fontSize: 'clamp(2.5rem, 4.8vw, 4rem)',
+              fontSize: 'clamp(2.2rem, 4.5vw, 3.8rem)',
               fontWeight: 400,
               fontStyle: 'italic',
-              lineHeight: 1.08,
+              lineHeight: 1.1,
               color: '#1C1917',
-              marginBottom: '1.5rem',
+              marginBottom: '1.25rem',
               letterSpacing: '-0.02em'
             }}>
               Made with soul.<br />
@@ -112,11 +109,11 @@ export const Storefront: React.FC = () => {
             </h1>
 
             <p style={{
-              fontSize: '1rem',
+              fontSize: '0.98rem',
               lineHeight: 1.6,
               color: '#38332A',
               maxWidth: '380px',
-              marginBottom: '2.25rem',
+              marginBottom: '2rem',
               fontWeight: 400
             }}>
               A contemporary studio for handmade pieces, thoughtful details and creative living.
@@ -125,10 +122,12 @@ export const Storefront: React.FC = () => {
             <div>
               <button
                 onClick={scrollToCollection}
+                className="btn-3d"
                 style={{
                   backgroundColor: '#1C1917',
                   color: '#FAF7EE',
                   border: 'none',
+                  borderRadius: '6px',
                   padding: '0.85rem 1.75rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
@@ -137,16 +136,7 @@ export const Storefront: React.FC = () => {
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.6rem',
-                  transition: 'transform 0.2s, background-color 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#000000';
-                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#1C1917';
-                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+                  gap: '0.6rem'
                 }}
               >
                 <span>EXPLORE COLLECTION</span>
@@ -160,37 +150,37 @@ export const Storefront: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '2.5rem',
+            padding: 'clamp(1.5rem, 3.5vw, 2.5rem)',
             position: 'relative',
-            borderLeft: '1px solid rgba(28, 25, 23, 0.06)'
+            borderLeft: '1px solid rgba(28, 25, 23, 0.08)'
           }}>
             <div style={{
-              width: '280px',
-              height: '380px',
+              width: 'min(280px, 80vw)',
+              height: 'min(360px, 100vw)',
               borderTopLeftRadius: '140px',
               borderTopRightRadius: '140px',
               border: '1px solid rgba(28, 25, 23, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              position: 'relative'
+              position: 'relative',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
             }}>
               {/* Central Gold Medallion */}
-              <div style={{
-                width: '170px',
-                height: '170px',
+              <div className="medallion-3d" style={{
+                width: 'min(170px, 50vw)',
+                height: 'min(170px, 50vw)',
                 borderRadius: '50%',
-                backgroundColor: '#EAD068',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
-                boxShadow: '0 10px 25px rgba(184, 142, 40, 0.15)',
                 padding: '1rem'
               }}>
                 <span className="font-editorial" style={{
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   letterSpacing: '0.2em',
                   color: '#1C1917',
                   textTransform: 'uppercase',
@@ -199,7 +189,7 @@ export const Storefront: React.FC = () => {
                   THE
                 </span>
                 <span className="font-editorial" style={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.2rem',
                   fontWeight: 700,
                   letterSpacing: '0.08em',
                   color: '#1C1917',
@@ -209,7 +199,7 @@ export const Storefront: React.FC = () => {
                   SHEFALIs
                 </span>
                 <span className="font-editorial" style={{
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   letterSpacing: '0.2em',
                   color: '#1C1917',
                   textTransform: 'uppercase',
@@ -409,8 +399,8 @@ export const Storefront: React.FC = () => {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '2rem'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
+            gap: 'clamp(1.25rem, 3vw, 2rem)'
           }}>
             {filteredProducts.map((product) => {
               const hasDiscount = product.originalPrice && product.originalPrice > product.price;
@@ -421,29 +411,28 @@ export const Storefront: React.FC = () => {
                 <div
                   key={product._id}
                   onClick={() => setActiveProductForDetails(product)}
+                  className="card-3d product-card"
                   style={{
-                    backgroundColor: '#FAF7EE',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #EAE5D4',
+                    borderRadius: '16px',
+                    padding: '1.1rem',
                     display: 'flex',
                     flexDirection: 'column',
                     cursor: 'pointer',
-                    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-                    position: 'relative'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
+                    position: 'relative',
+                    boxShadow: '0 8px 24px rgba(28, 25, 23, 0.04)'
                   }}
                 >
                   {/* Image Container */}
                   <div style={{
                     width: '100%',
                     aspectRatio: '1 / 1',
-                    backgroundColor: '#EAE5D8',
+                    backgroundColor: '#F7F4EA',
+                    borderRadius: '10px',
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: '1rem'
+                    marginBottom: '0.85rem'
                   }}>
                     {displayImage ? (
                       <img
