@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import {
-  Search, ShoppingBag, Heart
+  Search, ShoppingBag, Heart, Sparkles, ArrowDownRight, Compass
 } from 'lucide-react';
 
 export const Storefront: React.FC = () => {
@@ -15,6 +15,47 @@ export const Storefront: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating'>('featured');
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+
+  // Superior desktop parallax state
+  const [scrollY, setScrollY] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop, { passive: true });
+
+    let rafId: number;
+    const handleScroll = () => {
+      if (window.innerWidth < 768) return;
+      rafId = requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDesktop || !heroRef.current) return;
+    const rect = heroRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y });
+  };
+
+  const handleHeroMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
 
   const categories = [
     'ALL',
@@ -60,30 +101,129 @@ export const Storefront: React.FC = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Smooth desktop parallax transformations
+  const heroTranslateY = isDesktop ? Math.min(scrollY * 0.16, 120) : 0;
+  const archTranslateY = isDesktop ? Math.min(scrollY * 0.08, 60) : 0;
+  const orbTranslateY1 = isDesktop ? scrollY * -0.12 : 0;
+  const orbTranslateY2 = isDesktop ? scrollY * 0.2 : 0;
+  const watermarkShift = isDesktop ? (scrollY * 0.3) : 0;
+
+  // 3D Mouse tilt on hero
+  const tiltX = isDesktop ? mousePos.y * -14 : 0;
+  const tiltY = isDesktop ? mousePos.x * 16 : 0;
+
   return (
-    <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2.5rem, 5vw, 4rem)', paddingBottom: '4rem', paddingTop: 'clamp(1rem, 2.5vw, 2rem)' }}>
+    <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(2.5rem, 5vw, 4rem)', paddingBottom: '4rem', paddingTop: 'clamp(1rem, 2.5vw, 2rem)', position: 'relative' }}>
 
-      {/* ── SECTION 1: SPLIT HERO (Matches Screenshot 1) ── */}
-      <section style={{
-        width: '100%',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        border: '1px solid #EAE5D4',
-        boxShadow: '0 12px 36px rgba(28, 25, 23, 0.05)',
-        backgroundColor: '#F6E58D'
-      }}>
-        <div className="hero-split-grid">
+      {/* ── PARALLAX AMBIENT BACKGROUND LAYER (Desktop Only) ── */}
+      {isDesktop && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden',
+          opacity: 0.45
+        }}>
+          {/* Parallax Floating Ambient Ring 1 */}
+          <div style={{
+            position: 'absolute',
+            top: '15%',
+            right: '5%',
+            width: '420px',
+            height: '420px',
+            borderRadius: '50%',
+            border: '1px dashed rgba(230, 206, 96, 0.4)',
+            transform: `translate3d(0, ${orbTranslateY1}px, 0) rotate(${scrollY * 0.04}deg)`,
+            willChange: 'transform',
+            transition: 'transform 0.1s linear'
+          }} />
 
-          {/* Left Side: Soft Warm Butter Yellow */}
+          {/* Parallax Floating Ambient Ring 2 */}
+          <div style={{
+            position: 'absolute',
+            top: '55%',
+            left: '-100px',
+            width: '360px',
+            height: '360px',
+            borderRadius: '50%',
+            border: '1px solid rgba(46, 90, 68, 0.15)',
+            transform: `translate3d(0, ${orbTranslateY2}px, 0) rotate(${scrollY * -0.05}deg)`,
+            willChange: 'transform',
+            transition: 'transform 0.1s linear'
+          }} />
+
+          {/* Floating Subtle Watermark Monogram */}
+          <div style={{
+            position: 'absolute',
+            top: '40%',
+            right: '-10%',
+            fontSize: '18vw',
+            fontFamily: "'Cormorant Garamond', serif",
+            fontStyle: 'italic',
+            color: 'rgba(28, 25, 23, 0.02)',
+            transform: `translate3d(${-watermarkShift * 0.2}px, ${scrollY * 0.05}px, 0)`,
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+            willChange: 'transform'
+          }}>
+            ATELIER SHEFALIS
+          </div>
+        </div>
+      )}
+
+      {/* ── SECTION 1: SPLIT HERO (Enhanced 3D Parallax & Interactive Tilt) ── */}
+      <section
+        ref={heroRef}
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={handleHeroMouseLeave}
+        style={{
+          width: '100%',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          border: '1px solid #EAE5D4',
+          boxShadow: '0 16px 48px rgba(28, 25, 23, 0.06)',
+          backgroundColor: '#F6E58D',
+          position: 'relative',
+          zIndex: 1,
+          perspective: isDesktop ? '1200px' : 'none',
+          transformStyle: 'preserve-3d'
+        }}
+      >
+        {/* Ambient Hero Parallax Glow */}
+        <div style={{
+          position: 'absolute',
+          top: '-30%',
+          right: '-10%',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, transparent 70%)',
+          transform: `translate3d(0, ${heroTranslateY * -0.5}px, 0)`,
+          pointerEvents: 'none',
+          willChange: 'transform'
+        }} />
+
+        <div className="hero-split-grid" style={{ position: 'relative', zIndex: 2 }}>
+
+          {/* Left Side: Soft Warm Butter Yellow with Parallax Float */}
           <div style={{
             backgroundColor: '#F6E58D',
             padding: 'clamp(1.75rem, 4.5vw, 4rem)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            position: 'relative'
+            position: 'relative',
+            transform: `translate3d(0, ${heroTranslateY * 0.3}px, 0)`,
+            transition: 'transform 0.08s ease-out',
+            willChange: 'transform'
           }}>
             <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.22em',
@@ -91,7 +231,8 @@ export const Storefront: React.FC = () => {
               color: '#4A3E1B',
               marginBottom: '1.25rem'
             }}>
-              HANDMADE · ART · DESIGN
+              <Sparkles size={13} color="#B88E28" />
+              <span>HANDMADE · ART · DESIGN</span>
             </div>
 
             <h1 className="font-editorial" style={{
@@ -101,7 +242,9 @@ export const Storefront: React.FC = () => {
               lineHeight: 1.1,
               color: '#1C1917',
               marginBottom: '1.25rem',
-              letterSpacing: '-0.02em'
+              letterSpacing: '-0.02em',
+              transform: isDesktop ? `translate3d(${mousePos.x * 6}px, ${mousePos.y * 4}px, 20px)` : 'none',
+              transition: 'transform 0.15s ease-out'
             }}>
               Made with soul.<br />
               With Passion and<br />
@@ -114,7 +257,9 @@ export const Storefront: React.FC = () => {
               color: '#38332A',
               maxWidth: '380px',
               marginBottom: '2rem',
-              fontWeight: 400
+              fontWeight: 400,
+              transform: isDesktop ? `translate3d(${mousePos.x * 3}px, ${mousePos.y * 2}px, 10px)` : 'none',
+              transition: 'transform 0.2s ease-out'
             }}>
               A contemporary studio for handmade pieces, thoughtful details and creative living.
             </p>
@@ -140,11 +285,12 @@ export const Storefront: React.FC = () => {
                 }}
               >
                 <span>EXPLORE COLLECTION</span>
+                <ArrowDownRight size={14} />
               </button>
             </div>
           </div>
 
-          {/* Right Side: Architectural Arch Motif & Golden Sun Emblem */}
+          {/* Right Side: Architectural Arch Motif & 3D Parallax Golden Sun Emblem */}
           <div style={{
             backgroundColor: '#F6E58D',
             display: 'flex',
@@ -152,7 +298,12 @@ export const Storefront: React.FC = () => {
             justifyContent: 'center',
             padding: 'clamp(1.5rem, 3.5vw, 2.5rem)',
             position: 'relative',
-            borderLeft: '1px solid rgba(28, 25, 23, 0.08)'
+            borderLeft: '1px solid rgba(28, 25, 23, 0.08)',
+            transform: isDesktop
+              ? `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate3d(0, ${archTranslateY}px, 30px)`
+              : 'none',
+            transition: 'transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            willChange: 'transform'
           }}>
             <div style={{
               width: 'min(280px, 80vw)',
@@ -164,10 +315,26 @@ export const Storefront: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              backdropFilter: 'blur(6px)',
+              boxShadow: isDesktop
+                ? `${-mousePos.x * 20}px ${-mousePos.y * 20 + 12}px 32px rgba(28, 25, 23, 0.08)`
+                : '0 8px 24px rgba(0,0,0,0.04)',
+              transition: 'box-shadow 0.15s ease'
             }}>
-              {/* Central Gold Medallion */}
+              {/* Floating Orbit Rings */}
+              <div style={{
+                position: 'absolute',
+                width: '110%',
+                height: '110%',
+                borderRadius: '50%',
+                border: '1px dashed rgba(28, 25, 23, 0.18)',
+                transform: `rotate(${scrollY * 0.08}deg)`,
+                pointerEvents: 'none',
+                willChange: 'transform'
+              }} />
+
+              {/* Central Gold Medallion with 3D Depth */}
               <div className="medallion-3d" style={{
                 width: 'min(170px, 50vw)',
                 height: 'min(170px, 50vw)',
@@ -177,7 +344,11 @@ export const Storefront: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center',
-                padding: '1rem'
+                padding: '1rem',
+                transform: isDesktop
+                  ? `translate3d(${mousePos.x * 12}px, ${mousePos.y * 12}px, 40px)`
+                  : 'none',
+                transition: 'transform 0.12s ease'
               }}>
                 <span className="font-editorial" style={{
                   fontSize: '0.8rem',
@@ -213,6 +384,37 @@ export const Storefront: React.FC = () => {
 
         </div>
       </section>
+
+      {/* ── PARALLAX TICKER STRIP ── */}
+      <div style={{
+        width: '100%',
+        overflow: 'hidden',
+        borderTop: '1px solid #EAE5D4',
+        borderBottom: '1px solid #EAE5D4',
+        padding: '0.65rem 0',
+        backgroundColor: '#FAF7EE',
+        position: 'relative'
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: '3rem',
+          whiteSpace: 'nowrap',
+          transform: isDesktop ? `translate3d(${-watermarkShift * 0.4}px, 0, 0)` : 'none',
+          transition: isDesktop ? 'transform 0.05s linear' : 'none',
+          willChange: isDesktop ? 'transform' : 'auto'
+        }}>
+          {[...Array(6)].map((_, i) => (
+            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '2rem', fontSize: '0.74rem', fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#78716C' }}>
+              <span>ORIGINAL CERAMICS & SCULPTURES</span>
+              <span style={{ color: '#B88E28' }}>✦</span>
+              <span>100% HANDMADE IN SMALL BATCHES</span>
+              <span style={{ color: '#B88E28' }}>✦</span>
+              <span>TIMELESS LIVING AESTHETICS</span>
+              <span style={{ color: '#B88E28' }}>✦</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ── SECTION 2: THE STUDIO STATEMENT (Matches Screenshot 2) ── */}
       <section id="the-studio" style={{

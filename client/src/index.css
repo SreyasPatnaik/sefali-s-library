@@ -849,20 +849,24 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ===================================
-   3D AESTHETIC ENHANCEMENTS
+   3D AESTHETIC & PARALLAX ENHANCEMENTS
    =================================== */
 
 .card-3d {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
-  transform: perspective(1000px) translateZ(0);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  transform: perspective(1000px) translate3d(0, 0, 0);
   border: 1px solid #EAE5D4;
-  box-shadow: 0 6px 18px rgba(28, 25, 23, 0.04), 0 1px 3px rgba(28, 25, 23, 0.02);
+  box-shadow: 0 8px 24px rgba(28, 25, 23, 0.04), 0 1px 3px rgba(28, 25, 23, 0.02);
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
 }
 
-.card-3d:hover {
-  transform: perspective(1000px) translateY(-5px) translateZ(6px);
-  box-shadow: 0 18px 38px rgba(28, 25, 23, 0.09), 0 6px 14px rgba(28, 25, 23, 0.04);
-  border-color: #D6D0C2;
+@media (min-width: 769px) {
+  .card-3d:hover {
+    transform: perspective(1000px) translateY(-8px) scale(1.015) translateZ(12px);
+    box-shadow: 0 24px 48px rgba(28, 25, 23, 0.12), 0 8px 18px rgba(28, 25, 23, 0.06);
+    border-color: #D6D0C2;
+  }
 }
 
 .medallion-3d {
@@ -873,23 +877,24 @@ body.modal-open { overflow: hidden; }
     inset 0 2px 4px rgba(255, 255, 255, 0.8),
     inset 0 -3px 6px rgba(110, 80, 15, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   animation: floatMedallion 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes floatMedallion {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1deg); }
+  0%   { transform: translateY(0px) rotate(0deg); }
+  50%  { transform: translateY(-8px) rotate(1.2deg); }
   100% { transform: translateY(0px) rotate(0deg); }
 }
 
 .medallion-3d:hover {
-  transform: scale(1.04) translateY(-10px);
+  transform: scale(1.06) translateY(-10px) rotate(3deg) !important;
   box-shadow:
-    0 22px 42px rgba(184, 142, 40, 0.38),
-    0 6px 14px rgba(0, 0, 0, 0.12),
-    inset 0 3px 6px rgba(255, 255, 255, 0.9),
-    inset 0 -3px 6px rgba(110, 80, 15, 0.4);
+    0 24px 48px rgba(184, 142, 40, 0.42),
+    0 6px 16px rgba(0, 0, 0, 0.14),
+    inset 0 3px 6px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 6px rgba(110, 80, 15, 0.45) !important;
 }
 
 .btn-3d {
@@ -921,6 +926,23 @@ body.modal-open { overflow: hidden; }
   position: relative;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(8px);
+}
+
+/* Parallax Depth & Micro-glare Utility */
+.parallax-layer-slow {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.parallax-layer-fast {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.parallax-spotlight {
+  background: radial-gradient(circle at center, rgba(246, 229, 141, 0.35) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
 }
 
 
