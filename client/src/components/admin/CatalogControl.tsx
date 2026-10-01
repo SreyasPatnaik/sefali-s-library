@@ -239,8 +239,11 @@ export const CatalogControl: React.FC = () => {
           backgroundColor: '#FFFFFF',
           border: '1px solid #EAE5D5',
           borderRadius: '16px',
-          padding: '1.5rem',
-          boxShadow: 'var(--shadow-subtle)'
+          padding: 'clamp(0.85rem, 3vw, 1.5rem)',
+          boxShadow: 'var(--shadow-subtle)',
+          width: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
         }}>
           
           {/* Search Bar */}
@@ -252,7 +255,7 @@ export const CatalogControl: React.FC = () => {
             marginBottom: '1.5rem',
             flexWrap: 'wrap'
           }}>
-            <div style={{ position: 'relative', flex: '1 1 240px' }}>
+            <div style={{ position: 'relative', flex: '1 1 220px', width: '100%' }}>
               <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#78716C' }} />
               <input
                 type="text"
@@ -260,7 +263,7 @@ export const CatalogControl: React.FC = () => {
                 placeholder="Search pieces, categories, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '2.4rem', height: '42px', fontSize: '0.85rem' }}
+                style={{ paddingLeft: '2.4rem', height: '42px', fontSize: '0.85rem', width: '100%' }}
               />
             </div>
             <div style={{ fontSize: '0.82rem', color: '#78716C', fontWeight: 600 }}>
@@ -269,8 +272,8 @@ export const CatalogControl: React.FC = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="desktop-catalog-table" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="desktop-catalog-table" style={{ overflowX: 'auto', width: '100%' }}>
+            <table style={{ width: '100%', minWidth: '620px', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EAE5D5', color: '#78716C', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Piece</th>
@@ -345,8 +348,8 @@ export const CatalogControl: React.FC = () => {
             </table>
           </div>
 
-          {/* Mobile Card View (shown on phones) */}
-          <div className="mobile-catalog-cards" style={{ display: 'none', flexDirection: 'column', gap: '1rem' }}>
+          {/* Mobile Card View (shown on phones with full-width, non-cutoff action buttons) */}
+          <div className="mobile-catalog-cards" style={{ display: 'none', flexDirection: 'column', gap: '1rem', width: '100%' }}>
             {filteredProducts.length === 0 ? (
               <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#78716C' }}>
                 No pieces found.
@@ -359,43 +362,81 @@ export const CatalogControl: React.FC = () => {
                     backgroundColor: '#FAF7EE',
                     border: '1px solid #EAE5D5',
                     borderRadius: '12px',
-                    padding: '1rem',
+                    padding: '0.85rem',
                     display: 'flex',
-                    gap: '0.85rem',
-                    alignItems: 'center'
+                    flexDirection: 'column',
+                    gap: '0.75rem',
+                    width: '100%',
+                    boxSizing: 'border-box'
                   }}
                 >
-                  <img
-                    src={prod.coverImage || prod.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=150'}
-                    alt={prod.title}
-                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5' }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {prod.title}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-                      <span style={{ fontWeight: 700, color: '#1C1917', fontSize: '0.9rem' }}>₹{prod.price}</span>
-                      <span className={`badge ${prod.status === 'Published' ? 'badge-green' : 'badge-yellow'}`} style={{ fontSize: '0.65rem' }}>
-                        {prod.status}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: '#78716C', marginTop: '0.2rem' }}>
-                      Stock: {prod.stockQuantity ?? 10} • {prod.category || prod.tag}
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', width: '100%' }}>
+                    <img
+                      src={prod.coverImage || prod.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=150'}
+                      alt={prod.title}
+                      style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5', flexShrink: 0 }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1C1917', lineHeight: 1.3, wordBreak: 'break-word' }}>
+                        {prod.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 700, color: '#1C1917', fontSize: '0.9rem' }}>₹{prod.price}</span>
+                        <span className={`badge ${prod.status === 'Published' ? 'badge-green' : 'badge-yellow'}`} style={{ fontSize: '0.62rem', padding: '0.15rem 0.45rem' }}>
+                          {prod.status}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#78716C', marginTop: '0.2rem' }}>
+                        Stock: {prod.stockQuantity ?? 10} • {prod.category || prod.tag}
+                      </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+
+                  {/* High-visibility full-width Mobile Actions */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', width: '100%', borderTop: '1px solid #EAE5D5', paddingTop: '0.65rem' }}>
                     <button
+                      type="button"
                       onClick={() => handleOpenEditModal(prod)}
-                      style={{ background: '#FFFFFF', border: '1px solid #D6D3CA', cursor: 'pointer', padding: '0.45rem', borderRadius: '6px', color: '#1C1917' }}
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        color: '#1C1917',
+                        border: '1px solid #D6D3CA',
+                        borderRadius: '6px',
+                        padding: '0.55rem 0.5rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        width: '100%'
+                      }}
                     >
-                      <Edit size={16} />
+                      <Edit size={14} />
+                      <span>Edit Piece</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => setProductToDelete(prod)}
-                      style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', cursor: 'pointer', padding: '0.45rem', borderRadius: '6px', color: '#DC2626' }}
+                      style={{
+                        backgroundColor: '#FEE2E2',
+                        color: '#DC2626',
+                        border: '1px solid #FCA5A5',
+                        borderRadius: '6px',
+                        padding: '0.55rem 0.5rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem',
+                        width: '100%'
+                      }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
+                      <span>Delete</span>
                     </button>
                   </div>
                 </div>

@@ -653,6 +653,14 @@ body.modal-open { overflow: hidden; }
     box-sizing: border-box !important;
   }
 
+  /* Sticky Translucent Header */
+  .sticky-translucent-header {
+    background-color: rgba(250, 247, 238, 0.82) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(234, 229, 212, 0.75) !important;
+  }
+
   /* Header: hide desktop nav, show hamburger controls */
   .hdr-desktop-nav  { display: none !important; }
   .hdr-mobile-controls { display: flex !important; align-items: center; gap: 0.5rem; }
@@ -686,11 +694,17 @@ body.modal-open { overflow: hidden; }
     grid-template-columns: 1fr !important;
     gap: 1.25rem !important;
     width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Admin Catalog Table → Mobile Card Transformation */
   .desktop-catalog-table { display: none !important; }
-  .mobile-catalog-cards { display: flex !important; }
+  .mobile-catalog-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
   /* Admin Dashboard & Management */
   .admin-stats-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; }

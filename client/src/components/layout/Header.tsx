@@ -64,16 +64,16 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header style={{
-        backgroundColor: scrolled ? 'rgba(250, 247, 238, 0.98)' : '#FAF7EE',
-        borderBottom: '1px solid #EAE5D4',
+      <header className="sticky-translucent-header" style={{
+        backgroundColor: scrolled ? 'rgba(250, 247, 238, 0.82)' : 'rgba(250, 247, 238, 0.72)',
+        borderBottom: '1px solid rgba(234, 229, 212, 0.75)',
         position: 'sticky',
         top: 0,
         zIndex: 200,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        transition: 'all 0.25s ease',
-        boxShadow: scrolled ? '0 4px 20px rgba(28, 25, 23, 0.04)' : 'none',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: scrolled ? '0 8px 28px rgba(28, 25, 23, 0.07)' : '0 2px 10px rgba(28, 25, 23, 0.02)',
       }}>
         <div className="container" style={{
           display: 'flex',
