@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
-import { Search, Plus, Edit, Trash2, X, AlertTriangle, UploadCloud, Loader2, Sparkles, Image as ImageIcon } from 'lucide-react';
+import {
+  Search, Plus, Edit, Trash2, X, AlertTriangle, Loader2,
+  Image as ImageIcon, Upload, Camera, RefreshCw, CheckCircle2, Eye
+} from 'lucide-react';
 import { api } from '../../services/api';
 
 export const CatalogControl: React.FC = () => {
@@ -14,10 +17,11 @@ export const CatalogControl: React.FC = () => {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Form states
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Handmade');
+  const [category, setCategory] = useState('Handmade & Sculptures');
   const [price, setPrice] = useState('4500');
   const [originalPrice, setOriginalPrice] = useState('5500');
   const [status, setStatus] = useState<'Published' | 'Draft'>('Published');
@@ -26,9 +30,12 @@ export const CatalogControl: React.FC = () => {
   const [dimensions, setDimensions] = useState('');
   const [stockQuantity, setStockQuantity] = useState('10');
   const [coverImage, setCoverImage] = useState('');
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
 
-  // File upload state for image or document
-  const [productFile, setProductFile] = useState<File | null>(null);
+  // File upload state for image
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredProducts = books.filter(b =>
     b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,7 +46,7 @@ export const CatalogControl: React.FC = () => {
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     setTitle('');
-    setCategory('Handmade');
+    setCategory('Handmade & Sculptures');
     setPrice('4500');
     setOriginalPrice('5500');
     setStatus('Published');
@@ -48,14 +55,16 @@ export const CatalogControl: React.FC = () => {
     setDimensions('18cm x 12cm x 24cm');
     setStockQuantity('8');
     setCoverImage('');
-    setProductFile(null);
+    setImagePreviewUrl('');
+    setSelectedImageFile(null);
+    setImageMode('upload');
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (prod: Product) => {
     setEditingProduct(prod);
     setTitle(prod.title);
-    setCategory(prod.category || prod.tag || 'Handmade');
+    setCategory(prod.category || prod.tag || 'Handmade & Sculptures');
     setPrice(prod.price.toString());
     setOriginalPrice((prod.originalPrice || prod.price).toString());
     setStatus(prod.status);
@@ -63,9 +72,40 @@ export const CatalogControl: React.FC = () => {
     setMaterials(prod.materials || '');
     setDimensions(prod.dimensions || '');
     setStockQuantity((prod.stockQuantity || 10).toString());
-    setCoverImage(prod.coverImage || prod.images?.[0] || '');
-    setProductFile(null);
+    const existingImg = prod.coverImage || prod.images?.[0] || '';
+    setCoverImage(existingImg);
+    setImagePreviewUrl(existingImg);
+    setSelectedImageFile(null);
+    setImageMode(existingImg ? 'upload' : 'upload');
     setIsModalOpen(true);
+  };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('error', 'Please select a valid image file (PNG, JPG, WEBP, etc.)');
+      return;
+    }
+
+    setSelectedImageFile(file);
+    const localUrl = URL.createObjectURL(file);
+    setImagePreviewUrl(localUrl);
+
+    // Upload immediately to server so we have a permanent URL
+    setIsUploadingImage(true);
+    try {
+      const res = await api.uploadImage(file);
+      setCoverImage(res.imageUrl);
+      setImagePreviewUrl(res.imageUrl);
+      addToast('success', 'Picture uploaded and saved to studio media store!');
+    } catch (err: any) {
+      console.warn('Direct upload warning, will embed on save:', err.message);
+      // We still keep the selected file to send in multipart formData on save
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -105,11 +145,12 @@ export const CatalogControl: React.FC = () => {
 
       if (coverImage.trim()) {
         formData.append('coverImage', coverImage.trim());
+        formData.append('image', coverImage.trim());
         formData.append('images', JSON.stringify([coverImage.trim()]));
       }
 
-      if (productFile) {
-        formData.append('ebookFile', productFile);
+      if (selectedImageFile) {
+        formData.append('ebookFile', selectedImageFile);
       }
 
       if (editingProduct) {
@@ -152,64 +193,88 @@ export const CatalogControl: React.FC = () => {
   return (
     <div style={{ paddingBottom: '4rem' }}>
       
-      {/* Title */}
-      <div style={{ marginBottom: '2.5rem', borderBottom: '1px solid #EAE5D5', paddingBottom: '1.5rem' }}>
-        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-          ADMIN PORTAL • INVENTORY CONTROL
-        </span>
-        <h1 className="font-serif" style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.3rem', color: '#1C1917' }}>
-          Studio Collection & Inventory
-        </h1>
+      {/* Title Bar */}
+      <div style={{
+        marginBottom: '2rem',
+        borderBottom: '1px solid #EAE5D5',
+        paddingBottom: '1.25rem',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '1rem'
+      }}>
+        <div>
+          <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+            ADMIN PORTAL • INVENTORY CONTROL
+          </span>
+          <h1 className="font-serif" style={{ fontSize: '2.2rem', fontWeight: 700, marginTop: '0.2rem', color: '#1C1917', lineHeight: 1.2 }}>
+            Studio Collection & Inventory
+          </h1>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => refreshBooks()}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.82rem', padding: '0.55rem 1rem' }}
+            title="Reload catalog from database"
+          >
+            <RefreshCw size={15} /> Refresh Data
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleOpenAddModal}
+            style={{ fontSize: '0.85rem', padding: '0.65rem 1.35rem' }}
+          >
+            <Plus size={16} /> Publish New Piece
+          </button>
+        </div>
       </div>
 
-      <div className="responsive-grid-admin" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2rem' }}>
+      <div className="responsive-grid-admin" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.75rem' }}>
         
-        {/* Main Catalog Table Box */}
+        {/* Main Catalog Section */}
         <div style={{
           backgroundColor: '#FFFFFF',
           border: '1px solid #EAE5D5',
           borderRadius: '16px',
-          padding: '2rem',
+          padding: '1.5rem',
           boxShadow: 'var(--shadow-subtle)'
         }}>
           
-          {/* Top Search & Add Button Bar */}
+          {/* Search Bar */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '1rem',
-            marginBottom: '1.75rem'
+            marginBottom: '1.5rem',
+            flexWrap: 'wrap'
           }}>
-            <div style={{ position: 'relative', width: '300px' }}>
+            <div style={{ position: 'relative', flex: '1 1 240px' }}>
               <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#78716C' }} />
               <input
                 type="text"
                 className="form-input"
-                placeholder="Search studio pieces, category..."
+                placeholder="Search pieces, categories, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ paddingLeft: '2.4rem', height: '42px', fontSize: '0.85rem' }}
               />
             </div>
-
-            <button
-              className="btn btn-primary"
-              onClick={handleOpenAddModal}
-              style={{ fontSize: '0.85rem', padding: '0.65rem 1.4rem' }}
-            >
-              <Plus size={16} /> Add New Piece
-            </button>
+            <div style={{ fontSize: '0.82rem', color: '#78716C', fontWeight: 600 }}>
+              {filteredProducts.length} item{filteredProducts.length !== 1 ? 's' : ''} total
+            </div>
           </div>
 
-          {/* Catalog Table */}
-          <div style={{ overflowX: 'auto' }}>
+          {/* Desktop Table View */}
+          <div className="desktop-catalog-table" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #EAE5D5', color: '#78716C', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Piece</th>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Category</th>
-                  <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Materials</th>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Price</th>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Stock</th>
                   <th style={{ padding: '0.85rem 0.5rem', fontWeight: 700 }}>Status</th>
@@ -219,57 +284,54 @@ export const CatalogControl: React.FC = () => {
               <tbody>
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ padding: '3rem 1rem', textAlign: 'center', color: '#78716C' }}>
+                    <td colSpan={6} style={{ padding: '3rem 1rem', textAlign: 'center', color: '#78716C' }}>
                       No pieces found in the active studio catalog.
                     </td>
                   </tr>
                 ) : (
                   filteredProducts.map(prod => (
                     <tr key={prod._id} style={{ borderBottom: '1px solid #FAF7EE', fontSize: '0.9rem', color: '#1C1917' }}>
-                      <td style={{ padding: '1rem 0.5rem' }}>
+                      <td style={{ padding: '0.9rem 0.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <img
                             src={prod.coverImage || prod.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=150'}
                             alt={prod.title}
-                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px' }}
+                            style={{ width: '44px', height: '44px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5' }}
                           />
                           <div>
                             <strong style={{ display: 'block', fontSize: '0.9rem', color: '#1C1917' }}>{prod.title}</strong>
-                            <span style={{ fontSize: '0.75rem', color: '#8C827A' }}>{prod.dimensions || 'Studio item'}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#8C827A' }}>{prod.dimensions || prod.materials || 'Handcrafted Studio Piece'}</span>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '1rem 0.5rem' }}>
+                      <td style={{ padding: '0.9rem 0.5rem' }}>
                         <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1C1917', backgroundColor: '#FAF7EE', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid #EAE5D5' }}>
                           {prod.category || prod.tag}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem 0.5rem', fontSize: '0.8rem', color: '#57534E', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {prod.materials || 'Handcrafted raw materials'}
-                      </td>
-                      <td style={{ padding: '1rem 0.5rem', fontWeight: 700, color: '#1C1917' }}>
+                      <td style={{ padding: '0.9rem 0.5rem', fontWeight: 700, color: '#1C1917' }}>
                         ₹{prod.price}
                       </td>
-                      <td style={{ padding: '1rem 0.5rem', fontSize: '0.85rem' }}>
+                      <td style={{ padding: '0.9rem 0.5rem', fontSize: '0.85rem' }}>
                         {prod.stockQuantity ?? 10} units
                       </td>
-                      <td style={{ padding: '1rem 0.5rem' }}>
+                      <td style={{ padding: '0.9rem 0.5rem' }}>
                         <span className={`badge ${prod.status === 'Published' ? 'badge-green' : 'badge-yellow'}`}>
                           {prod.status}
                         </span>
                       </td>
-                      <td style={{ padding: '1rem 0.5rem', textAlign: 'right' }}>
+                      <td style={{ padding: '0.9rem 0.5rem', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                           <button
                             onClick={() => handleOpenEditModal(prod)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1C1917', padding: '0.3rem' }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1C1917', padding: '0.4rem', borderRadius: '6px' }}
                             title="Edit Piece"
                           >
                             <Edit size={16} />
                           </button>
                           <button
                             onClick={() => setProductToDelete(prod)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '0.3rem' }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '0.4rem', borderRadius: '6px' }}
                             title="Delete Piece"
                           >
                             <Trash2 size={16} />
@@ -283,28 +345,86 @@ export const CatalogControl: React.FC = () => {
             </table>
           </div>
 
+          {/* Mobile Card View (shown on phones) */}
+          <div className="mobile-catalog-cards" style={{ display: 'none', flexDirection: 'column', gap: '1rem' }}>
+            {filteredProducts.length === 0 ? (
+              <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#78716C' }}>
+                No pieces found.
+              </div>
+            ) : (
+              filteredProducts.map(prod => (
+                <div
+                  key={prod._id}
+                  style={{
+                    backgroundColor: '#FAF7EE',
+                    border: '1px solid #EAE5D5',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    display: 'flex',
+                    gap: '0.85rem',
+                    alignItems: 'center'
+                  }}
+                >
+                  <img
+                    src={prod.coverImage || prod.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=150'}
+                    alt={prod.title}
+                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5' }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {prod.title}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                      <span style={{ fontWeight: 700, color: '#1C1917', fontSize: '0.9rem' }}>₹{prod.price}</span>
+                      <span className={`badge ${prod.status === 'Published' ? 'badge-green' : 'badge-yellow'}`} style={{ fontSize: '0.65rem' }}>
+                        {prod.status}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#78716C', marginTop: '0.2rem' }}>
+                      Stock: {prod.stockQuantity ?? 10} • {prod.category || prod.tag}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <button
+                      onClick={() => handleOpenEditModal(prod)}
+                      style={{ background: '#FFFFFF', border: '1px solid #D6D3CA', cursor: 'pointer', padding: '0.45rem', borderRadius: '6px', color: '#1C1917' }}
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => setProductToDelete(prod)}
+                      style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', cursor: 'pointer', padding: '0.45rem', borderRadius: '6px', color: '#DC2626' }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
         </div>
 
-        {/* Right Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Right Info Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           
-          <div className="card" style={{ backgroundColor: '#FAF7EE', border: '1px solid #EAE5D5', padding: '1.5rem' }}>
-            <h3 className="font-serif" style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1C1917' }}>
-              Live Storefront Sync
+          <div className="card" style={{ backgroundColor: '#FAF7EE', border: '1px solid #EAE5D5', padding: '1.25rem' }}>
+            <h3 className="font-serif" style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.4rem', color: '#1C1917' }}>
+              Live Cloud Sync
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#57534E', lineHeight: 1.6, margin: 0 }}>
-              All additions and price modifications update immediately on the customer storefront.
+            <p style={{ fontSize: '0.825rem', color: '#57534E', lineHeight: 1.5, margin: 0 }}>
+              All additions and picture uploads are permanently saved in MongoDB GridFS and live-synced to all customers.
             </p>
           </div>
 
-          <div className="card" style={{ backgroundColor: '#FFFFFF', border: '1px solid #EAE5D5', padding: '1.5rem' }}>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: '#1C1917', marginBottom: '0.75rem' }}>
-              Image Guidelines
+          <div className="card" style={{ backgroundColor: '#FFFFFF', border: '1px solid #EAE5D5', padding: '1.25rem' }}>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', color: '#1C1917', marginBottom: '0.6rem', letterSpacing: '0.06em' }}>
+              Picture Upload Tips
             </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.825rem', color: '#57534E' }}>
-              <div>• Use high-res square or portrait studio shots</div>
-              <div>• Direct Unsplash or CDN URLs supported</div>
-              <div>• Highlight texture, natural lighting & craft</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.8rem', color: '#57534E' }}>
+              <div>📸 Select direct photos from your phone or device</div>
+              <div>✨ Clear high-res images show luxury craft</div>
+              <div>🖼️ Images are automatically stored in database</div>
             </div>
           </div>
 
@@ -376,24 +496,175 @@ export const CatalogControl: React.FC = () => {
         </div>
       )}
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Studio Piece Modal with Picture Upload */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => !isSubmitting && setIsModalOpen(false)}>
-          <div className="modal-content animate-pop-in" onClick={e => e.stopPropagation()} style={{ maxWidth: '640px', padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 className="font-serif" style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
-                {editingProduct ? 'Edit Studio Piece' : 'Add New Studio Piece'}
-              </h3>
+          <div
+            className="modal-content animate-pop-in"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '620px',
+              padding: '1.75rem',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              borderRadius: '16px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #EAE5D5', paddingBottom: '0.75rem' }}>
+              <div>
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  STUDIO PIECE CREATOR
+                </span>
+                <h3 className="font-serif" style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
+                  {editingProduct ? 'Edit Studio Piece' : 'Publish New Collection Piece'}
+                </h3>
+              </div>
               <button
                 disabled={isSubmitting}
                 onClick={() => setIsModalOpen(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#78716C' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#78716C', padding: '0.3rem' }}
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
             <form onSubmit={handleSaveProduct}>
+              
+              {/* Picture Upload Area (User explicitly requested picture upload instead of URL) */}
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <label className="form-label" style={{ fontWeight: 700, color: '#1C1917' }}>
+                    📸 Product Picture
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      style={{
+                        background: imageMode === 'upload' ? '#1C1917' : '#FAF7EE',
+                        color: imageMode === 'upload' ? '#FFFFFF' : '#78716C',
+                        border: '1px solid #D6D3CA',
+                        borderRadius: '4px',
+                        fontSize: '0.72rem',
+                        padding: '0.2rem 0.5rem',
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                    >
+                      Upload Picture
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      style={{
+                        background: imageMode === 'url' ? '#1C1917' : '#FAF7EE',
+                        color: imageMode === 'url' ? '#FFFFFF' : '#78716C',
+                        border: '1px solid #D6D3CA',
+                        borderRadius: '4px',
+                        fontSize: '0.72rem',
+                        padding: '0.2rem 0.5rem',
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                    >
+                      Image URL
+                    </button>
+                  </div>
+                </div>
+
+                {imageMode === 'upload' ? (
+                  <div>
+                    {/* Picture drop/upload box */}
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: '2px dashed #D6D1C1',
+                        borderRadius: '12px',
+                        padding: '1.25rem',
+                        textAlign: 'center',
+                        backgroundColor: '#FAF7EE',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        style={{ display: 'none' }}
+                      />
+
+                      {imagePreviewUrl ? (
+                        <div style={{ position: 'relative', width: '100%', maxHeight: '200px', display: 'flex', justifyContent: 'center' }}>
+                          <img
+                            src={imagePreviewUrl}
+                            alt="Preview"
+                            style={{ maxHeight: '180px', maxWidth: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                          />
+                          {isUploadingImage && (
+                            <div style={{
+                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                              backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: '8px',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF'
+                            }}>
+                              <Loader2 size={24} className="animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: '#F6E58D', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1917' }}>
+                            <Camera size={22} />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1C1917', display: 'block' }}>
+                              Click to select picture from device
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#78716C' }}>
+                              Supports JPG, PNG, WEBP, GIF, SVG (Stored in database)
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {imagePreviewUrl && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem', fontSize: '0.75rem', color: '#2E5A44' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <CheckCircle2 size={14} /> Picture attached successfully
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          style={{ background: 'none', border: 'none', color: '#78716C', textDecoration: 'underline', cursor: 'pointer' }}
+                        >
+                          Change Picture
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      className="form-input"
+                      value={coverImage}
+                      onChange={e => {
+                        setCoverImage(e.target.value);
+                        setImagePreviewUrl(e.target.value);
+                      }}
+                      placeholder="https://images.unsplash.com/photo-..."
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Piece Title</label>
                 <input
@@ -401,20 +672,21 @@ export const CatalogControl: React.FC = () => {
                   className="form-input"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  placeholder="e.g. Ochre Ribbed Ceramic Vase"
+                  placeholder="e.g. Crimson Betta Art Piece"
                   required
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Category</label>
                   <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
-                    <option value="Handmade">Handmade</option>
-                    <option value="Art">Art Piece</option>
-                    <option value="Design">Design & Decor</option>
-                    <option value="Living">Studio Living</option>
-                    <option value="Accessories">Accessories & Bags</option>
+                    <option value="Handmade & Sculptures">Handmade & Sculptures</option>
+                    <option value="Art & Collectibles">Art & Collectibles</option>
+                    <option value="Bags & Leather">Bags & Leather</option>
+                    <option value="Ceramics & Pottery">Ceramics & Pottery</option>
+                    <option value="Studio Decor">Studio Decor</option>
+                    <option value="Lifestyle & Living">Lifestyle & Living</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -430,7 +702,7 @@ export const CatalogControl: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Original / Compare Price (₹)</label>
                   <input
@@ -453,18 +725,7 @@ export const CatalogControl: React.FC = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Image URL</label>
-                <input
-                  type="url"
-                  className="form-input"
-                  value={coverImage}
-                  onChange={e => setCoverImage(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                 <div className="form-group">
                   <label className="form-label">Materials</label>
                   <input
@@ -472,7 +733,7 @@ export const CatalogControl: React.FC = () => {
                     className="form-input"
                     value={materials}
                     onChange={e => setMaterials(e.target.value)}
-                    placeholder="e.g. Glazed stoneware, matte finish"
+                    placeholder="e.g. Optical resin, crimson pigments"
                   />
                 </div>
                 <div className="form-group">
@@ -482,31 +743,40 @@ export const CatalogControl: React.FC = () => {
                     className="form-input"
                     value={dimensions}
                     onChange={e => setDimensions(e.target.value)}
-                    placeholder="e.g. 15cm x 15cm x 28cm"
+                    placeholder="e.g. 24cm x 16cm x 12cm"
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Piece Story & Description</label>
+                <label className="form-label">Piece Story & Craftsmanship</label>
                 <textarea
                   className="form-textarea"
                   rows={3}
                   value={synopsis}
                   onChange={e => setSynopsis(e.target.value)}
-                  placeholder="Tell the story of how this piece was handcrafted with meditation and soul..."
+                  placeholder="Tell the story of how this piece was sculpted and handcrafted in our studio..."
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploadingImage}
                 className="btn btn-primary"
-                style={{ width: '100%', padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  marginTop: '0.75rem',
+                  borderRadius: '10px'
+                }}
               >
                 {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-                {isSubmitting ? 'Saving Piece...' : (editingProduct ? 'Save Changes' : 'Publish to Collection')}
+                {isSubmitting ? 'Saving to Catalog...' : (editingProduct ? 'Save Piece Changes' : 'Publish Piece to Collection')}
               </button>
             </form>
           </div>

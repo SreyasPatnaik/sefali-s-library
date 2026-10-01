@@ -11,13 +11,16 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = ['.pdf', '.epub', '.mobi', '.doc', '.docx', '.txt'];
+  const allowedExtensions = [
+    '.pdf', '.epub', '.mobi', '.doc', '.docx', '.txt',
+    '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.avif'
+  ];
   const ext = path.extname(file.originalname).toLowerCase();
   
-  if (allowedExtensions.includes(ext)) {
+  if (allowedExtensions.includes(ext) || file.mimetype.startsWith('image/') || file.mimetype.startsWith('application/pdf')) {
     cb(null, true);
   } else {
-    cb(new Error(`Invalid file type "${ext}". Only PDF, EPUB, MOBI, and Word documents are permitted.`));
+    cb(new Error(`Invalid file type "${ext}". Permitted files: Images (JPG, PNG, WEBP, GIF, SVG) and Documents (PDF, EPUB, DOC).`));
   }
 };
 

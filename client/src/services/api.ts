@@ -151,6 +151,25 @@ export const api = {
     return res.json();
   },
 
+  async uploadImage(file: File): Promise<{ imageUrl: string; fileId: string; originalName: string }> {
+    const formData = new FormData();
+    formData.append('imageFile', file);
+    const res = await fetch(`${API_BASE}/books/upload-image`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to upload image file');
+    }
+    const data = await res.json();
+    return {
+      ...data,
+      imageUrl: getFileUrl(data.imageUrl)
+    };
+  },
+
   async deleteBook(id: string): Promise<void> {
     const res = await fetch(`${API_BASE}/books/${id}`, {
       method: 'DELETE',

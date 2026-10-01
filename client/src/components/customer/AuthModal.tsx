@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Eye, EyeOff, ShieldCheck, ArrowLeft, Mail, User as UserIcon, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
@@ -37,6 +37,7 @@ export const AuthModal: React.FC = () => {
   const [showGoogleAccountDialog, setShowGoogleAccountDialog] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [customGoogleName, setCustomGoogleName] = useState('');
+  const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize Google Identity Services if available
   useEffect(() => {
@@ -57,6 +58,18 @@ export const AuthModal: React.FC = () => {
             }
           }
         });
+
+        if (googleBtnContainerRef.current) {
+          window.google.accounts.id.renderButton(googleBtnContainerRef.current, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            shape: 'rectangular',
+            text: 'continue_with',
+            logo_alignment: 'left',
+            width: 360
+          });
+        }
       } catch (err) {
         console.warn('Google Identity initialization notice:', err);
       }
@@ -515,7 +528,10 @@ export const AuthModal: React.FC = () => {
             <span>{googleLoading ? 'Signing in with Google...' : 'Continue with Google Account'}</span>
           </button>
 
-          {/* Google Account Authentication Dialog */}
+          {/* Google Official Button Container (Rendered by Google Identity Services when Client ID exists) */}
+          <div ref={googleBtnContainerRef} style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }} />
+
+          {/* Google Direct Sign-In Dialog */}
           {showGoogleAccountDialog && (
             <div className="card-3d" style={{
               backgroundColor: '#FFFFFF',
@@ -540,24 +556,25 @@ export const AuthModal: React.FC = () => {
               </div>
 
               {/* Direct Google email form */}
-              <form onSubmit={handleCustomGoogleSubmit} style={{ marginBottom: '1rem' }}>
+              <form onSubmit={handleCustomGoogleSubmit}>
                 <div className="form-group" style={{ marginBottom: '0.65rem' }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Your Google Email Address</label>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Your Google Account Email</label>
                   <div style={{ position: 'relative' }}>
                     <Mail size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#78716C' }} />
                     <input
                       type="email"
                       className="form-input"
-                      placeholder="e.g. yourname@gmail.com"
+                      placeholder="you@gmail.com"
                       value={customGoogleEmail}
                       onChange={(e) => setCustomGoogleEmail(e.target.value)}
                       style={{ paddingLeft: '2.2rem', fontSize: '0.85rem' }}
                       required
+                      autoFocus
                     />
                   </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                <div className="form-group" style={{ marginBottom: '0.85rem' }}>
                   <label className="form-label" style={{ fontSize: '0.75rem' }}>Your Name (Optional)</label>
                   <div style={{ position: 'relative' }}>
                     <UserIcon size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#78716C' }} />
@@ -576,67 +593,11 @@ export const AuthModal: React.FC = () => {
                   type="submit"
                   disabled={googleLoading}
                   className="btn btn-primary"
-                  style={{ width: '100%', fontSize: '0.85rem', padding: '0.6rem' }}
+                  style={{ width: '100%', fontSize: '0.85rem', padding: '0.65rem' }}
                 >
-                  {googleLoading ? 'Connecting...' : 'Authorize & Sign In via Google'}
+                  {googleLoading ? 'Signing In...' : 'Sign In with Google Account'}
                 </button>
               </form>
-
-              <div style={{ fontSize: '0.75rem', color: '#8C827A', textAlign: 'center', marginBottom: '0.6rem' }}>
-                or choose quick profile:
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div
-                  onClick={() => handleGoogleAccountSelect('sreyas.patnaik@gmail.com', 'Sreyas Patnaik', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.6rem 0.85rem',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    backgroundColor: '#FAF7EE',
-                    transition: 'all 0.2s',
-                    border: '1px solid #EAE5D4'
-                  }}
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                    alt="Sreyas"
-                    style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1C1917' }}>Sreyas Patnaik</div>
-                    <div style={{ fontSize: '0.72rem', color: '#78716C' }}>sreyas.patnaik@gmail.com</div>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => handleGoogleAccountSelect('shefali.studio@gmail.com', 'Shefali Jangid', 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.6rem 0.85rem',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    backgroundColor: '#FAF7EE',
-                    transition: 'all 0.2s',
-                    border: '1px solid #EAE5D4'
-                  }}
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=120&q=80"
-                    alt="Shefali"
-                    style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1C1917' }}>Shefali Jangid</div>
-                    <div style={{ fontSize: '0.72rem', color: '#78716C' }}>shefali.studio@gmail.com</div>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

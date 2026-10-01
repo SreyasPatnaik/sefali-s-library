@@ -668,6 +668,10 @@ body.modal-open { overflow: hidden; }
   .testimonial-grid { grid-template-columns: 1fr !important; }
   .responsive-grid-2, .responsive-grid-3, .responsive-grid-admin, .shelf-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
 
+  /* Admin Catalog Table → Mobile Card Transformation */
+  .desktop-catalog-table { display: none !important; }
+  .mobile-catalog-cards { display: flex !important; }
+
   /* Admin Dashboard & Management */
   .admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.85rem !important; }
   .admin-info-cards-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }

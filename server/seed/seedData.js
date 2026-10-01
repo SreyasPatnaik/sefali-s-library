@@ -224,24 +224,25 @@ const initialProducts = [
   }
 ];
 
-const seedData = async () => {
+const seedData = async (forceReseed = false) => {
   try {
-    const existingCount = await Book.countDocuments();
-    // If database already contains books with old book titles, clear and reseed with studio products
-    const sampleOld = await Book.findOne({ title: 'System Design Masterclass' });
-    if (existingCount > 0 && !sampleOld) {
-      console.log('[Seed] Database already initialized with studio collection.');
-      return;
-    }
+    const existingProducts = await Book.find({});
+    // Check if current database contains legacy library books (e.g., tech books, books missing category/materials)
+    const hasLegacyBooks = existingProducts.some(p => 
+      !p.materials || 
+      !p.dimensions || 
+      ['SYSTEM DESIGN', 'PROGRAMMING', 'PYTHON', 'JAVASCRIPT', 'REACT', 'DEV', 'CLOUD'].includes(p.tag) ||
+      p.author?.includes('Alex Xu') ||
+      p.author?.includes('Robert Martin')
+    );
 
-    if (sampleOld) {
-      console.log('[Seed] Upgrading database catalog from library books to e-commerce studio products...');
+    if (forceReseed || hasLegacyBooks || existingProducts.length === 0) {
+      console.log('[Seed] Cleaning legacy books and seeding curated design studio catalog...');
       await Book.deleteMany({});
       await Order.deleteMany({});
-    }
 
-    console.log('[Seed] Seeding curated design studio products...');
-    const insertedProducts = await Book.insertMany(initialProducts);
+      const insertedProducts = await Book.insertMany(initialProducts);
+      console.log(`[Seed] Successfully inserted ${insertedProducts.length} curated design studio products!`);
 
     const bettaArt = insertedProducts.find(p => p.title === 'Crimson Betta Art Piece');
     const bagItem = insertedProducts.find(p => p.title === 'Emerald Textured Atelier Handbag');
@@ -343,6 +344,9 @@ const seedData = async () => {
 
     console.log('[Seed] Design Studio database successfully populated!');
     console.log('[Seed] Admin Credentials: admin@theshefalisspace.com / admin123 (or access via URL ".admin")');
+    } else {
+      console.log(`[Seed] Database already has ${existingProducts.length} studio items initialized.`);
+    }
   } catch (err) {
     console.error('[Seed] Error seeding data:', err);
   }

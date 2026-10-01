@@ -388,6 +388,61 @@ router.get('/:id/download', async (req, res) => {
   }
 });
 
+// @route   POST /api/books/upload-image
+// @desc    Upload product photo/picture directly to GridFS storage (Admin)
+router.post('/upload-image', auth, adminOnly, upload.single('imageFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided for upload.' });
+    }
+    const fileId = await saveFileToGridFS(req.file);
+    const imageUrl = `/api/books/stream/${fileId}`;
+    res.status(200).json({
+      imageUrl,
+      fileId,
+      originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      size: req.file.size
+    });
+  } catch (err) {
+    console.error('Image upload failed:', err);
+    res.status(500).json({ message: 'Failed to upload studio piece image', error: err.message });
+  }
+});
+
+// @route   GET /api/books/stream/:fileId
+// @desc    Stream any GridFS uploaded asset (image, document, PDF)
+router.get('/stream/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(fileId)) {
+      return res.status(400).json({ message: 'Invalid file ID format' });
+    }
+
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'ebooks' });
+    const files = await bucket.find({ _id: new mongoose.Types.ObjectId(fileId) }).toArray();
+    
+    if (!files || files.length === 0) {
+      return res.status(404).json({ message: 'Asset not found in database storage' });
+    }
+
+    const file = files[0];
+    res.setHeader('Content-Type', file.contentType || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24h
+
+    const downloadStream = bucket.openDownloadStream(new mongoose.Types.ObjectId(fileId));
+    downloadStream.on('error', (err) => {
+      console.error('[GridFS stream error]:', err.message);
+      if (!res.headersSent) {
+        res.status(404).json({ message: 'File streaming error' });
+      }
+    });
+    downloadStream.pipe(res);
+  } catch (err) {
+    res.status(500).json({ message: 'Error streaming asset', error: err.message });
+  }
+});
+
 // @route   DELETE /api/books/:id
 // @desc    Delete e-book (Admin)
 router.delete('/:id', auth, adminOnly, async (req, res) => {
