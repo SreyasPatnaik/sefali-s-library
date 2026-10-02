@@ -198,7 +198,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const u = await api.getMe();
           setUser(u);
-          if (u.role === 'admin' || checkIsAdminUrl()) {
+          if (u.role === 'admin' && checkIsAdminUrl()) {
             setActiveMode('admin');
             setActiveTab('catalog');
             refreshAdminStats();

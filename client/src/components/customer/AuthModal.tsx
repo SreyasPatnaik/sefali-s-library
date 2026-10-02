@@ -171,6 +171,12 @@ export const AuthModal: React.FC = () => {
       } else {
         if (authModalTab === 'login') {
           res = await api.login(email, password);
+          if (res.user.role === 'admin') {
+            localStorage.removeItem('sefali_token');
+            setErrorMsg('This is an administrator account. Please log in via the designated Admin Portal (/.admin).');
+            setLoading(false);
+            return;
+          }
         } else {
           res = await api.register(name, email, password);
         }
@@ -179,7 +185,7 @@ export const AuthModal: React.FC = () => {
       localStorage.setItem('sefali_token', res.token);
       setUser(res.user);
 
-      if (res.user.role === 'admin') {
+      if (res.user.role === 'admin' && isAdminUrl) {
         setActiveMode('admin');
         setActiveTab('catalog');
         await refreshAdminStats();

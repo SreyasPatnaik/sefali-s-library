@@ -150,18 +150,17 @@ export const CheckoutModal: React.FC = () => {
   };
 
   return (
-    <div className="modal-overlay" onClick={() => setCheckoutBook(null)}>
+    <div className="modal-overlay checkout-overlay" onClick={() => setCheckoutBook(null)}>
       <div
-        className="modal-content animate-pop-in"
+        className="modal-content animate-pop-in checkout-modal-card"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '860px', padding: 0, overflow: 'hidden' }}
+        style={{ maxWidth: '860px', padding: 0 }}
       >
         {/* Header Bar */}
-        <div style={{
+        <div className="checkout-header-bar" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '1.25rem 2rem',
           backgroundColor: '#FAF7EE',
           borderBottom: '1px solid #EAE5D5'
         }}>
@@ -169,18 +168,19 @@ export const CheckoutModal: React.FC = () => {
             <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               THE SHEFALIS SPACE • CHECKOUT
             </span>
-            <h3 className="font-serif" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
+            <h3 className="font-serif checkout-modal-title" style={{ fontWeight: 700, color: '#1C1917', margin: 0 }}>
               Order & Shipping Confirmation
             </h3>
           </div>
           <button
             onClick={() => setCheckoutBook(null)}
+            aria-label="Close checkout"
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: '#78716C',
-              padding: '0.4rem',
+              padding: '0.45rem',
               borderRadius: '50%',
               backgroundColor: '#EAE6D8',
               display: 'flex'
@@ -191,32 +191,28 @@ export const CheckoutModal: React.FC = () => {
         </div>
 
         {/* 3 Step Progress Bar */}
-        <div className="checkout-steps-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1rem',
-          padding: '1.25rem 2rem 0 2rem'
-        }}>
+        <div className="checkout-steps-grid">
           <div
             className={`card ${step === 1 ? 'card-highlight' : ''}`}
-            style={{ padding: '0.75rem 1rem', border: step === 1 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 1 ? '#FFFBF0' : '#FFFFFF' }}
+            style={{ padding: '0.65rem 0.85rem', border: step === 1 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 1 ? '#FFFBF0' : '#FFFFFF' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <div style={{
-                width: '22px',
-                height: '22px',
+                width: '20px',
+                height: '20px',
                 borderRadius: '50%',
                 backgroundColor: step >= 1 ? '#1C1917' : '#EAE6D8',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.75rem',
-                fontWeight: 700
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                flexShrink: 0
               }}>
                 1
               </div>
-              <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
+              <h4 className="font-serif checkout-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
                 Delivery Address
               </h4>
             </div>
@@ -224,24 +220,25 @@ export const CheckoutModal: React.FC = () => {
 
           <div
             className={`card ${step === 2 ? 'card-highlight' : ''}`}
-            style={{ padding: '0.75rem 1rem', border: step === 2 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 2 ? '#FFFBF0' : '#FFFFFF' }}
+            style={{ padding: '0.65rem 0.85rem', border: step === 2 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 2 ? '#FFFBF0' : '#FFFFFF' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <div style={{
-                width: '22px',
-                height: '22px',
+                width: '20px',
+                height: '20px',
                 borderRadius: '50%',
                 backgroundColor: step >= 2 ? '#1C1917' : '#EAE6D8',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.75rem',
-                fontWeight: 700
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                flexShrink: 0
               }}>
                 2
               </div>
-              <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
+              <h4 className="font-serif checkout-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
                 Payment Gateway
               </h4>
             </div>
@@ -249,72 +246,74 @@ export const CheckoutModal: React.FC = () => {
 
           <div
             className={`card ${step === 3 ? 'card-highlight' : ''}`}
-            style={{ padding: '0.75rem 1rem', border: step === 3 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 3 ? '#FFFBF0' : '#FFFFFF' }}
+            style={{ padding: '0.65rem 0.85rem', border: step === 3 ? '2px solid #1C1917' : '1px solid #EAE5D5', backgroundColor: step === 3 ? '#FFFBF0' : '#FFFFFF' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <div style={{
-                width: '22px',
-                height: '22px',
+                width: '20px',
+                height: '20px',
                 borderRadius: '50%',
                 backgroundColor: step === 3 ? '#1C1917' : '#EAE6D8',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.75rem',
-                fontWeight: 700
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                flexShrink: 0
               }}>
                 3
               </div>
-              <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
-                Order Confirmed
+              <h4 className="font-serif checkout-step-label" style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
+                Confirmation
               </h4>
             </div>
           </div>
         </div>
 
         {/* Step Body */}
-        <div style={{ padding: '1.75rem 2rem' }}>
+        <div className="checkout-body-content">
           
           {step === 1 && (
             <div className="animate-fade-in">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', maxHeight: '180px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem', maxHeight: '180px', overflowY: 'auto' }}>
                 {itemsToBuy.map(item => (
                   <div key={item.book._id} style={{
                     backgroundColor: '#FAF7EE',
                     borderRadius: '8px',
-                    padding: '0.85rem 1.25rem',
+                    padding: '0.75rem 1rem',
                     border: '1px solid #EAE5D5',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    gap: '0.75rem'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
                       <img
                         src={item.book.coverImage || item.book.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=200'}
                         alt={item.book.title}
-                        style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }}
+                        style={{ width: '42px', height: '42px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }}
                       />
-                      <div>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', color: '#8C827A' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', color: '#8C827A', display: 'block' }}>
                           {item.book.category || item.book.tag}
                         </span>
-                        <h4 className="font-serif" style={{ fontSize: '1.05rem', fontWeight: 700, color: '#1C1917', margin: 0 }}>
-                          {item.book.title} {item.quantity > 1 && <span style={{ fontSize: '0.85rem', color: '#78716C' }}>× {item.quantity}</span>}
+                        <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.book.title} {item.quantity > 1 && <span style={{ fontSize: '0.8rem', color: '#78716C' }}>× {item.quantity}</span>}
                         </h4>
-                        <p style={{ fontSize: '0.75rem', color: '#78716C', margin: 0 }}>
-                          {item.book.materials || 'Handcrafted studio design'} • Insured Dispatch
+                        <p style={{ fontSize: '0.72rem', color: '#78716C', margin: 0 }}>
+                          {item.book.materials || 'Studio handcrafted'} • Insured Dispatch
                         </p>
                       </div>
                     </div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1C1917' }}>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1C1917', flexShrink: 0 }}>
                       ₹{item.book.price * item.quantity}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div className="checkout-form-grid">
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Full Recipient Name</label>
                   <input
@@ -363,7 +362,7 @@ export const CheckoutModal: React.FC = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="checkout-form-grid">
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">City</label>
                   <input
@@ -388,27 +387,19 @@ export const CheckoutModal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="checkout-footer-row" style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingTop: '1.25rem',
-                borderTop: '1px solid #EAE5D5',
-                marginTop: '1.5rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#78716C' }}>
-                  <Truck size={16} style={{ color: '#1C1917' }} />
+              <div className="checkout-footer-row">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.78rem', color: '#78716C' }}>
+                  <Truck size={16} style={{ color: '#1C1917', flexShrink: 0 }} />
                   <span>Complimentary insured shipping included with all studio pieces.</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '0.95rem', color: '#57534E' }}>
-                    Total: <strong style={{ color: '#1C1917', fontSize: '1.35rem' }}>₹{totalAmount}</strong>
+                <div className="checkout-footer-actions">
+                  <span style={{ fontSize: '0.9rem', color: '#57534E' }}>
+                    Total: <strong style={{ color: '#1C1917', fontSize: '1.25rem' }}>₹{totalAmount}</strong>
                   </span>
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary checkout-btn-submit"
                     onClick={handleNextStep}
-                    style={{ padding: '0.75rem 1.6rem', fontSize: '0.9rem' }}
                   >
                     Select Payment Method <ArrowRight size={16} />
                   </button>
@@ -419,11 +410,11 @@ export const CheckoutModal: React.FC = () => {
 
           {step === 2 && (
             <div className="animate-fade-in">
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1C1917', marginBottom: '1rem' }}>
+              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1C1917', marginBottom: '0.85rem' }}>
                 Choose Payment Method
               </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <div className="checkout-payment-grid">
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('upi')}
@@ -518,14 +509,14 @@ export const CheckoutModal: React.FC = () => {
               </div>
 
               {paymentMethod === 'upi' && (
-                <div className="checkout-upi-box" style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: '1.25rem', alignItems: 'center', backgroundColor: '#FAF7EE', padding: '1.25rem', borderRadius: '8px' }}>
-                  <div style={{ textAlign: 'center' }}>
+                <div className="checkout-upi-box">
+                  <div style={{ textAlign: 'center', margin: '0 auto' }}>
                     <div style={{ width: '130px', height: '130px', backgroundColor: '#FFF', padding: '8px', border: '1px solid #EAE5D5', borderRadius: '8px', margin: '0 auto' }}>
                       <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=shefali.space@upi" alt="UPI QR Code" style={{ width: '100%', height: '100%' }} />
                     </div>
                     <span style={{ fontSize: '0.7rem', color: '#78716C', marginTop: '6px', display: 'block' }}>Scan with GPay / PhonePe / Paytm</span>
                   </div>
-                  <div className="form-group" style={{ margin: 0 }}>
+                  <div className="form-group" style={{ margin: 0, width: '100%' }}>
                     <label className="form-label">Or enter VPA / UPI ID</label>
                     <input
                       type="text"
@@ -534,7 +525,7 @@ export const CheckoutModal: React.FC = () => {
                       onChange={(e) => setUpiId(e.target.value)}
                       placeholder="username@okhdfcbank"
                     />
-                    <span style={{ fontSize: '0.75rem', color: '#78716C', marginTop: '4px', display: 'block' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#78716C', marginTop: '4px', display: 'block' }}>
                       Direct instant verification via Unified Payments Interface.
                     </span>
                   </div>
@@ -543,7 +534,7 @@ export const CheckoutModal: React.FC = () => {
 
               {paymentMethod === 'card' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div className="form-group">
+                  <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">Card Number</label>
                     <input
                       type="text"
@@ -553,12 +544,12 @@ export const CheckoutModal: React.FC = () => {
                       placeholder="e.g. 4532 8901 2345 6789"
                     />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group">
+                  <div className="checkout-form-grid">
+                    <div className="form-group" style={{ margin: 0 }}>
                       <label className="form-label">Expiry Date</label>
                       <input type="text" className="form-input" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} placeholder="MM/YY" />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{ margin: 0 }}>
                       <label className="form-label">CVV Security Code</label>
                       <input type="password" className="form-input" value={cardCvv} onChange={(e) => setCardCvv(e.target.value)} placeholder="123" />
                     </div>
@@ -567,19 +558,19 @@ export const CheckoutModal: React.FC = () => {
               )}
 
               {paymentMethod === 'cod' && (
-                <div style={{ backgroundColor: '#FAF7EE', padding: '1.25rem', borderRadius: '8px', border: '1px solid #EAE5D5' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                    <Package size={22} style={{ color: '#1C1917' }} />
-                    <h4 className="font-serif" style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Cash on Delivery Selected</h4>
+                <div style={{ backgroundColor: '#FAF7EE', padding: '1rem', borderRadius: '8px', border: '1px solid #EAE5D5' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.4rem' }}>
+                    <Package size={20} style={{ color: '#1C1917' }} />
+                    <h4 className="font-serif" style={{ fontSize: '1rem', margin: 0, fontWeight: 700 }}>Cash on Delivery Selected</h4>
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#57534E', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '0.8rem', color: '#57534E', margin: 0, lineHeight: 1.5 }}>
                     Pay with cash or UPI directly to our delivery courier partner when your handcrafted studio package arrives at your doorstep.
                   </p>
                 </div>
               )}
 
               {paymentMethod === 'netbanking' && (
-                <div className="form-group">
+                <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Select Your Banking Provider</label>
                   <select className="form-select">
                     <option>HDFC Bank Retail & Corporate</option>
@@ -591,33 +582,25 @@ export const CheckoutModal: React.FC = () => {
                 </div>
               )}
 
-              <div className="checkout-footer-row" style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingTop: '1.25rem',
-                borderTop: '1px solid #EAE5D5',
-                marginTop: '1.5rem'
-              }}>
-                <span style={{ fontSize: '0.95rem', color: '#57534E' }}>
-                  Total Investment: <strong style={{ color: '#1C1917', fontSize: '1.4rem' }}>₹{totalAmount}</strong>
+              <div className="checkout-footer-row">
+                <span style={{ fontSize: '0.9rem', color: '#57534E' }}>
+                  Total Investment: <strong style={{ color: '#1C1917', fontSize: '1.25rem' }}>₹{totalAmount}</strong>
                 </span>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div className="checkout-footer-buttons">
                   <button
                     className="btn btn-secondary"
                     onClick={() => setStep(1)}
-                    style={{ padding: '0.75rem 1.25rem', fontSize: '0.85rem' }}
+                    style={{ padding: '0.65rem 1.1rem', fontSize: '0.825rem' }}
                   >
-                    Back to Address
+                    Back
                   </button>
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary checkout-btn-submit"
                     onClick={handleNextStep}
                     disabled={isProcessing}
-                    style={{ padding: '0.75rem 1.75rem', fontSize: '0.9rem' }}
                   >
-                    {isProcessing ? 'Processing Order...' : paymentMethod === 'cod' ? `Confirm Order (₹${totalAmount})` : `Pay ₹${totalAmount} & Place Order`}
+                    {isProcessing ? 'Processing...' : paymentMethod === 'cod' ? `Confirm Order (₹${totalAmount})` : `Pay ₹${totalAmount}`}
                   </button>
                 </div>
               </div>
@@ -625,10 +608,10 @@ export const CheckoutModal: React.FC = () => {
           )}
 
           {step === 3 && (
-            <div className="animate-pop-in" style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+            <div className="animate-pop-in" style={{ textAlign: 'center', padding: '1rem 0' }}>
               <div style={{
-                width: '72px',
-                height: '72px',
+                width: '64px',
+                height: '64px',
                 borderRadius: '50%',
                 backgroundColor: '#FAF7EE',
                 border: '2px solid #1C1917',
@@ -636,36 +619,36 @@ export const CheckoutModal: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 1.25rem auto'
+                margin: '0 auto 1rem auto'
               }}>
-                <CheckCircle2 size={42} />
+                <CheckCircle2 size={36} />
               </div>
 
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', color: '#A08020', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', color: '#A08020', textTransform: 'uppercase' }}>
                 ORDER CONFIRMED • #{completedOrderNum}
               </span>
-              <h2 className="font-serif" style={{ fontSize: '1.85rem', fontWeight: 700, color: '#1C1917', margin: '0.4rem 0 0.6rem 0' }}>
+              <h2 className="font-serif" style={{ fontSize: '1.6rem', fontWeight: 700, color: '#1C1917', margin: '0.3rem 0 0.5rem 0' }}>
                 Thank You for Your Order
               </h2>
-              <p style={{ fontSize: '0.9rem', color: '#57534E', maxWidth: '520px', margin: '0 auto 1.75rem auto', lineHeight: 1.6 }}>
+              <p style={{ fontSize: '0.85rem', color: '#57534E', maxWidth: '480px', margin: '0 auto 1.5rem auto', lineHeight: 1.5 }}>
                 Your order has been received at <strong>THE SHEFALIS SPACE</strong>. We are carefully preparing your handcrafted pieces with soul, passion, and meditation.
               </p>
 
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <button
                   className="btn btn-secondary"
                   onClick={handleDownloadInvoice}
-                  style={{ padding: '0.75rem 1.4rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                  style={{ padding: '0.7rem 1.25rem', fontSize: '0.825rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
                 >
-                  <Download size={16} /> Download Tax Invoice
+                  <Download size={15} /> Download Tax Invoice
                 </button>
 
                 <button
                   className="btn btn-primary"
                   onClick={handleFinish}
-                  style={{ padding: '0.75rem 1.75rem', fontSize: '0.9rem' }}
+                  style={{ padding: '0.7rem 1.5rem', fontSize: '0.85rem' }}
                 >
-                  View My Orders <ArrowRight size={16} />
+                  View My Orders <ArrowRight size={15} />
                 </button>
               </div>
             </div>

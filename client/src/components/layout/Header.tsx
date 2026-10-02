@@ -64,147 +64,154 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky-translucent-header" style={{
-        backgroundColor: scrolled ? 'rgba(250, 247, 238, 0.82)' : 'rgba(250, 247, 238, 0.72)',
-        borderBottom: '1px solid rgba(234, 229, 212, 0.75)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 200,
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: scrolled ? '0 8px 28px rgba(28, 25, 23, 0.07)' : '0 2px 10px rgba(28, 25, 23, 0.02)',
-      }}>
-        <div className="container" style={{
+      <header className={`sticky-translucent-header ${scrolled ? 'header-scrolled' : ''}`}>
+        <div className="container header-container" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingTop: '1rem',
-          paddingBottom: '1rem',
+          paddingTop: scrolled ? '0.75rem' : '1rem',
+          paddingBottom: scrolled ? '0.75rem' : '1rem',
+          transition: 'padding 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}>
 
-          {/* ── Brand Logo ── */}
+          {/* ── Brand Logo with Studio Crest ── */}
           <div
             onClick={() => {
               if (isAdmin) { setActiveTab('catalog'); }
               else { setActiveTab('storefront'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
               setMobileMenuOpen(false);
             }}
-            style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', flexShrink: 0 }}
+            className="brand-logo-container"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', flexShrink: 0 }}
           >
-            <span style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '0.92rem',
+            <div className="brand-crest-pill" style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #2E5A44 0%, #1C382A 100%)',
+              color: '#FAF7EE',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.85rem',
               fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: '#1C1917',
-              lineHeight: 1.15
+              fontFamily: 'var(--font-serif)',
+              border: '1px solid rgba(246, 229, 141, 0.4)',
+              boxShadow: '0 2px 8px rgba(46, 90, 68, 0.25)',
+              flexShrink: 0
             }}>
-              THE SHEFALIS SPACE
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '1px' }}>
-              <span style={{
-                fontSize: '0.62rem',
-                fontWeight: 600,
-                letterSpacing: '0.18em',
-                color: '#78716C',
-                textTransform: 'uppercase'
+              S
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span className="brand-title-text" style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.95rem',
+                fontWeight: 800,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: '#1C1917',
+                lineHeight: 1.15
               }}>
-                DESIGN STUDIO
+                THE SHEFALIS SPACE
               </span>
-              {isAdmin && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '1px' }}>
                 <span style={{
-                  fontSize: '0.55rem',
-                  fontWeight: 800,
-                  backgroundColor: '#1C1917',
-                  color: '#F6E58D',
-                  padding: '1px 5px',
-                  borderRadius: '3px',
-                  letterSpacing: '0.08em'
+                  fontSize: '0.62rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.2em',
+                  color: '#8C827A',
+                  textTransform: 'uppercase'
                 }}>
-                  ADMIN
+                  ART & DESIGN STUDIO
                 </span>
-              )}
+                {isAdmin && (
+                  <span style={{
+                    fontSize: '0.55rem',
+                    fontWeight: 800,
+                    backgroundColor: '#1C1917',
+                    color: '#F6E58D',
+                    padding: '1px 5px',
+                    borderRadius: '3px',
+                    letterSpacing: '0.08em'
+                  }}>
+                    ADMIN
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* ── Desktop Nav Links (No admin link in regular customer view) ── */}
-          <nav className="hdr-desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
+          {/* ── Desktop Nav Links (Pill Style) ── */}
+          <nav className="hdr-desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {isAdmin ? (
-              <>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: 'rgba(28, 25, 23, 0.03)',
+                padding: '0.3rem 0.5rem',
+                borderRadius: '30px',
+                border: '1px solid rgba(234, 229, 212, 0.8)'
+              }}>
                 <button
                   onClick={() => setActiveTab('catalog')}
-                  style={{
-                    ...navLinkStyle,
-                    fontWeight: activeTab === 'catalog' ? 700 : 500,
-                    borderBottom: activeTab === 'catalog' ? '1.5px solid #1C1917' : '1.5px solid transparent'
-                  }}
+                  className={`nav-pill-btn ${activeTab === 'catalog' ? 'active' : ''}`}
                 >
-                  <PlusCircle size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px' }} />
+                  <PlusCircle size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: '-1px' }} />
                   Products Catalog
                 </button>
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  style={{
-                    ...navLinkStyle,
-                    fontWeight: activeTab === 'dashboard' ? 700 : 500,
-                    borderBottom: activeTab === 'dashboard' ? '1.5px solid #1C1917' : '1.5px solid transparent'
-                  }}
+                  className={`nav-pill-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
                 >
-                  <LayoutDashboard size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px' }} />
+                  <LayoutDashboard size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: '-1px' }} />
                   Analytics
                 </button>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  style={{
-                    ...navLinkStyle,
-                    fontWeight: activeTab === 'orders' ? 700 : 500,
-                    borderBottom: activeTab === 'orders' ? '1.5px solid #1C1917' : '1.5px solid transparent'
-                  }}
+                  className={`nav-pill-btn ${activeTab === 'orders' ? 'active' : ''}`}
                 >
-                  <Truck size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px' }} />
+                  <Truck size={13} style={{ display: 'inline', marginRight: '5px', verticalAlign: '-1px' }} />
                   Orders Tracker
                 </button>
                 <button
                   onClick={navigateToStorefront}
-                  style={{
-                    ...navLinkStyle,
-                    color: '#78716C',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
+                  className="nav-pill-btn"
+                  style={{ color: '#78716C' }}
                 >
-                  <ArrowLeft size={13} />
-                  View Storefront
+                  <ArrowLeft size={13} style={{ display: 'inline', marginRight: '4px' }} />
+                  Storefront
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <button onClick={() => scrollToSection('about')} style={navLinkStyle}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                backgroundColor: 'rgba(28, 25, 23, 0.03)',
+                padding: '0.3rem 0.4rem',
+                borderRadius: '30px',
+                border: '1px solid rgba(234, 229, 212, 0.8)'
+              }}>
+                <button onClick={() => scrollToSection('about')} className="nav-pill-btn">
                   About
                 </button>
-                <button onClick={() => scrollToSection('collection')} style={navLinkStyle}>
+                <button onClick={() => scrollToSection('collection')} className="nav-pill-btn">
                   Collection
                 </button>
-                <button onClick={() => scrollToSection('contact')} style={navLinkStyle}>
+                <button onClick={() => scrollToSection('contact')} className="nav-pill-btn">
                   Contact Us
                 </button>
                 {user && (
                   <button
                     onClick={() => setActiveTab('my-shelf')}
-                    style={{
-                      ...navLinkStyle,
-                      fontWeight: activeTab === 'my-shelf' ? 700 : 500,
-                      borderBottom: activeTab === 'my-shelf' ? '1.5px solid #1C1917' : '1.5px solid transparent'
-                    }}
+                    className={`nav-pill-btn ${activeTab === 'my-shelf' ? 'active' : ''}`}
                   >
                     <Package size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-1px' }} />
                     My Orders
                   </button>
                 )}
-              </>
+              </div>
             )}
 
             {/* Shopping Bag / Cart */}
@@ -212,38 +219,12 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsCartDrawerOpen(true)}
                 aria-label="Shopping Bag"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #E7E3D4',
-                  borderRadius: '30px',
-                  padding: '0.42rem 0.95rem',
-                  cursor: 'pointer',
-                  color: '#1C1917',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.04em',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-                }}
+                className="hdr-bag-pill"
               >
-                <ShoppingBag size={14} style={{ color: '#1C1917' }} />
+                <ShoppingBag size={15} />
                 <span>Bag</span>
                 {cartItemCount > 0 && (
-                  <span style={{
-                    backgroundColor: '#1C1917',
-                    color: '#F6E58D',
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    borderRadius: '50%',
-                    width: '18px',
-                    height: '18px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
+                  <span className="hdr-cart-count">
                     {cartItemCount}
                   </span>
                 )}
@@ -252,32 +233,25 @@ export const Header: React.FC = () => {
 
             {/* User Login / Profile Button */}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  backgroundColor: '#F3EEDB',
-                  padding: '0.3rem 0.65rem',
-                  borderRadius: '20px'
-                }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.25rem' }}>
+                <div className="hdr-user-pill">
                   {user.avatar ? (
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }}
+                      style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
                     />
                   ) : (
                     <div style={{
-                      width: '20px',
-                      height: '20px',
+                      width: '22px',
+                      height: '22px',
                       borderRadius: '50%',
-                      backgroundColor: '#1C1917',
+                      backgroundColor: '#2E5A44',
                       color: '#FAF7EE',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '0.65rem',
+                      fontSize: '0.7rem',
                       fontWeight: 700
                     }}>
                       {user.name.charAt(0).toUpperCase()}
@@ -298,15 +272,7 @@ export const Header: React.FC = () => {
                 <button
                   onClick={logout}
                   title="Sign Out"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#78716C',
-                    padding: '0.35rem',
-                    display: 'flex',
-                    borderRadius: '50%'
-                  }}
+                  className="hdr-logout-btn"
                 >
                   <LogOut size={15} />
                 </button>
@@ -317,22 +283,7 @@ export const Header: React.FC = () => {
                   setAuthModalTab('login');
                   setAuthModalOpen(true);
                 }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  backgroundColor: '#1C1917',
-                  color: '#FAF7EE',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '0.48rem 1rem',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
+                className="btn-luxury-signin"
               >
                 <User size={13} /> Sign In
               </button>
@@ -344,34 +295,12 @@ export const Header: React.FC = () => {
             {!isAdmin && (
               <button
                 onClick={() => setIsCartDrawerOpen(true)}
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  backgroundColor: '#FFF',
-                  border: '1px solid #E7E3D4',
-                  borderRadius: '8px',
-                  padding: '0.45rem 0.65rem',
-                  cursor: 'pointer',
-                }}
+                aria-label="Shopping Bag"
+                className="hdr-mobile-bag-btn"
               >
-                <ShoppingBag size={17} color="#1C1917" />
+                <ShoppingBag size={18} color="#1C1917" />
                 {cartItemCount > 0 && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
-                    backgroundColor: '#1C1917',
-                    color: '#F6E58D',
-                    fontSize: '0.6rem',
-                    fontWeight: 700,
-                    borderRadius: '50%',
-                    width: '16px',
-                    height: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
+                  <span className="hdr-mobile-badge">
                     {cartItemCount}
                   </span>
                 )}
@@ -381,17 +310,7 @@ export const Header: React.FC = () => {
             <button
               onClick={() => setMobileMenuOpen(o => !o)}
               aria-label="Toggle menu"
-              style={{
-                background: mobileMenuOpen ? '#F0EDE4' : 'none',
-                border: '1px solid transparent',
-                borderColor: mobileMenuOpen ? '#E7E3D4' : 'transparent',
-                borderRadius: '8px',
-                padding: '0.45rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              className="hdr-mobile-toggle-btn"
             >
               {mobileMenuOpen ? <X size={20} color="#1C1917" /> : <Menu size={20} color="#1C1917" />}
             </button>
