@@ -362,12 +362,29 @@ export const Storefront: React.FC = () => {
                     : 'none',
                   transition: 'transform 0.12s ease'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '8px' }}>
                     <Sparkles size={12} color="#4A3E1B" />
                     <span style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.22em', color: '#38332A', textTransform: 'uppercase' }}>
                       ATELIER EST. 2026
                     </span>
                     <Sparkles size={12} color="#4A3E1B" />
+                  </div>
+
+                  <div style={{
+                    width: '84px',
+                    height: '84px',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    margin: '0.5rem 0 0.75rem 0',
+                    boxShadow: '0 8px 24px rgba(184, 142, 40, 0.25)',
+                    border: '2px solid rgba(255, 255, 255, 0.9)',
+                    backgroundColor: '#FAF0B4'
+                  }}>
+                    <img
+                      src="/hastha-logo.png"
+                      alt="The Hastha Studio Logo"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   </div>
                   
                   <span className="font-editorial" style={{
@@ -378,7 +395,7 @@ export const Storefront: React.FC = () => {
                     textTransform: 'uppercase',
                     lineHeight: 1.15,
                     textShadow: '0 1px 2px rgba(255,255,255,0.7)',
-                    margin: '0.35rem 0'
+                    margin: '0.2rem 0'
                   }}>
                     THE SHEFALIS SPACE
                   </span>
