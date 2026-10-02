@@ -1,6 +1,6 @@
 /**
- * Google Identity Services (GIS) - Modern Sign In with Google
- * Fully compliant with Google's OAuth 2.0 and FedCM policies.
+ * Google Authentication Service
+ * Compatible with Google Identity Services (GIS), OpenID Connect & token clients.
  */
 
 export interface GoogleUserProfile {
@@ -18,7 +18,7 @@ export const getGoogleClientId = (): string => {
 };
 
 /**
- * Decodes a Google JWT credential payload safely in browser
+ * Decodes a Google JWT credential payload safely
  */
 export const decodeGoogleJwt = (token: string): any => {
   try {
@@ -34,85 +34,111 @@ export const decodeGoogleJwt = (token: string): any => {
     );
     return JSON.parse(jsonPayload);
   } catch (err) {
-    console.warn('Failed to decode Google JWT token:', err);
+    console.warn('Failed to decode Google JWT:', err);
     return null;
   }
 };
 
 /**
- * Initializes Google Identity and renders official Google button into a container element
+ * Triggers Google Sign In directly via Google GIS OAuth2 or Google ID Prompt
  */
-export const renderGoogleSignInButton = (
-  containerElement: HTMLElement,
-  onSuccess: (profile: GoogleUserProfile) => void,
-  onError?: (err: any) => void
-): void => {
+export const triggerGoogleSignIn = async (): Promise<GoogleUserProfile> => {
   const clientId = getGoogleClientId();
+  const google = (window as any).google;
+
   if (!clientId) {
-    if (onError) onError(new Error('NO_CLIENT_ID'));
-    return;
+    throw new Error('Google Client ID is missing.');
   }
 
-  const tryRender = () => {
-    const googleAccountsId = (window as any).google?.accounts?.id;
-    if (!googleAccountsId) {
-      return false;
-    }
+  // 1. Try Google Identity Services Token Client (direct account selector popup)
+  if (google?.accounts?.oauth2?.initTokenClient) {
+    return new Promise((resolve, reject) => {
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'openid email profile',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse.error) {
+              reject(new Error(tokenResponse.error_description || tokenResponse.error));
+              return;
+            }
 
-    try {
-      googleAccountsId.initialize({
-        client_id: clientId,
-        callback: (response: any) => {
-          if (!response.credential) {
-            if (onError) onError(new Error('No Google credential returned'));
-            return;
+            try {
+              const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+              });
+
+              if (!res.ok) {
+                reject(new Error('Failed to fetch Google profile.'));
+                return;
+              }
+
+              const profile = await res.json();
+              resolve({
+                email: profile.email,
+                name: profile.name || profile.email.split('@')[0] || 'Studio Customer',
+                picture: profile.picture || '',
+                sub: profile.sub || profile.email
+              });
+            } catch (err) {
+              reject(err);
+            }
+          },
+          error_callback: (err: any) => {
+            if (err.type === 'popup_closed') {
+              reject(new Error('POPUP_CLOSED'));
+            } else {
+              reject(new Error(err.message || 'Google Sign-In was closed.'));
+            }
           }
+        });
 
-          const payload = decodeGoogleJwt(response.credential);
-          if (!payload || !payload.email) {
-            if (onError) onError(new Error('Invalid Google credential payload'));
-            return;
-          }
-
-          onSuccess({
-            email: payload.email,
-            name: payload.name || payload.email.split('@')[0] || 'Studio Customer',
-            picture: payload.picture || '',
-            sub: payload.sub || payload.email,
-            credential: response.credential
-          });
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      containerElement.innerHTML = '';
-
-      googleAccountsId.renderButton(containerElement, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-        shape: 'rectangular',
-        logo_alignment: 'left',
-        width: 340
-      });
-      return true;
-    } catch (err) {
-      console.warn('Google button render exception:', err);
-      return false;
-    }
-  };
-
-  if (!tryRender()) {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (tryRender() || attempts > 20) {
-        clearInterval(interval);
+        client.requestAccessToken({ prompt: 'select_account' });
+      } catch (err) {
+        reject(err);
       }
-    }, 150);
+    });
   }
+
+  // 2. Try Google accounts.id (One-Tap / ID Token flow)
+  if (google?.accounts?.id) {
+    return new Promise((resolve, reject) => {
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response: any) => {
+            if (!response.credential) {
+              reject(new Error('No Google credential received.'));
+              return;
+            }
+            const payload = decodeGoogleJwt(response.credential);
+            if (!payload || !payload.email) {
+              reject(new Error('Invalid Google credential payload.'));
+              return;
+            }
+            resolve({
+              email: payload.email,
+              name: payload.name || payload.email.split('@')[0],
+              picture: payload.picture || '',
+              sub: payload.sub || payload.email,
+              credential: response.credential
+            });
+          },
+          auto_select: false
+        });
+
+        google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            reject(new Error('Google Sign-In prompt is unavailable in this browser. Please try signing in with email.'));
+          }
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  throw new Error('Google Identity services are still loading. Please check your internet connection or try again in a few seconds.');
 };
 
 export const isGoogleAuthConfigured = (): boolean => {

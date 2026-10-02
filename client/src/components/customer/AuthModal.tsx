@@ -1,14 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Eye, EyeOff, ShieldCheck, ArrowLeft, Mail, User as UserIcon, Sparkles } from 'lucide-react';
+import { X, Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
-import { renderGoogleSignInButton, GoogleUserProfile } from '../../services/googleAuth';
-
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
+import { triggerGoogleSignIn } from '../../services/googleAuth';
 
 export const AuthModal: React.FC = () => {
   const {
@@ -35,7 +29,6 @@ export const AuthModal: React.FC = () => {
   const [adminTab, setAdminTab] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const googleBtnRef = useRef<HTMLDivElement>(null);
 
   if (!authModalOpen) return null;
 
@@ -48,48 +41,29 @@ export const AuthModal: React.FC = () => {
     setConfirmPassword('');
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    if (authModalOpen && !isAdminUrl) {
-      const timer = setTimeout(() => {
-        if (googleBtnRef.current && isMounted) {
-          renderGoogleSignInButton(
-            googleBtnRef.current,
-            async (profile: GoogleUserProfile) => {
-              if (!isMounted) return;
-              setGoogleLoading(true);
-              setErrorMsg('');
-              try {
-                await handleGoogleLogin({
-                  email: profile.email,
-                  name: profile.name,
-                  picture: profile.picture,
-                  credential: profile.credential
-                });
-                handleClose();
-                addToast('success', `Signed in as ${profile.name}`);
-              } catch (err: any) {
-                setErrorMsg(err.message || 'Google Sign-In failed');
-              } finally {
-                if (isMounted) setGoogleLoading(false);
-              }
-            },
-            (err) => {
-              console.warn('Google Sign-In initialization:', err);
-            }
-          );
-        }
-      }, 50);
-
-      return () => {
-        clearTimeout(timer);
-        isMounted = false;
-      };
+  const handleGoogleBtnClick = async () => {
+    setGoogleLoading(true);
+    setErrorMsg('');
+    try {
+      const profile = await triggerGoogleSignIn();
+      await handleGoogleLogin({
+        email: profile.email,
+        name: profile.name,
+        picture: profile.picture,
+        credential: profile.credential
+      });
+      handleClose();
+      addToast('success', `Signed in as ${profile.name}`);
+    } catch (err: any) {
+      if (err.message === 'POPUP_CLOSED') {
+        setErrorMsg('Sign-in popup was closed.');
+      } else {
+        setErrorMsg(err.message || 'Google Sign-In failed. Please try again.');
+      }
+    } finally {
+      setGoogleLoading(false);
     }
-    return () => {
-      isMounted = false;
-    };
-  }, [authModalOpen, isAdminUrl]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -347,9 +321,13 @@ export const AuthModal: React.FC = () => {
                 <div className="form-group">
                   <label className="form-label">Confirm Password</label>
                   <input
-                    type="password" className="form-input" placeholder="••••••••"
-                    value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    required minLength={6}
+                    type="password"
+                    className="form-input"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
                   />
                 </div>
               )}
@@ -357,25 +335,17 @@ export const AuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-3d"
+                className="btn btn-primary btn-3d"
                 style={{
                   width: '100%',
-                  padding: '0.8rem',
+                  padding: '0.85rem',
                   fontSize: '0.9rem',
-                  marginTop: '0.75rem',
+                  marginTop: '0.5rem',
                   backgroundColor: '#1C1917',
                   color: '#FAF7EE',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 700,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
+                  borderRadius: '8px'
                 }}
               >
-                <ShieldCheck size={16} />
                 {loading
                   ? 'Authenticating...'
                   : (adminTab === 'register' ? 'Create Admin Account' : 'Sign In as Administrator')}
@@ -408,7 +378,7 @@ export const AuthModal: React.FC = () => {
     );
   }
 
-  // ── Customer Auth Modal with Google OpenID ──────────────────────────────
+  // ── Customer Auth Modal with Google Sign-In & Email ───────────────────────
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div
@@ -453,32 +423,41 @@ export const AuthModal: React.FC = () => {
         {/* Modal Body */}
         <div style={{ padding: '1.75rem 2rem' }}>
 
-          {/* ── GOOGLE SIGN IN OFFICIAL BUTTON ── */}
-          <div style={{ width: '100%', marginBottom: '1.25rem' }}>
-            {googleLoading && (
-              <div style={{
-                padding: '0.8rem',
-                borderRadius: '8px',
-                backgroundColor: '#FAF7EE',
-                border: '1px solid #E7E3D4',
-                textAlign: 'center',
-                fontSize: '0.85rem',
-                color: '#57534E',
-                marginBottom: '0.5rem'
-              }}>
-                Signing in with Google...
-              </div>
-            )}
-            <div
-              ref={googleBtnRef}
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                minHeight: '44px'
-              }}
-            />
-          </div>
+          {/* ── GOOGLE SIGN IN BUTTON ── */}
+          <button
+            onClick={handleGoogleBtnClick}
+            disabled={googleLoading}
+            type="button"
+            className="btn-3d"
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.85rem',
+              backgroundColor: '#FFFFFF',
+              color: '#1C1917',
+              border: '1px solid #D6D3CA',
+              borderRadius: '10px',
+              padding: '0.8rem 1rem',
+              fontSize: '0.92rem',
+              fontWeight: 600,
+              cursor: googleLoading ? 'wait' : 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+              transition: 'all 0.2s ease',
+              marginBottom: '1.25rem',
+              opacity: googleLoading ? 0.8 : 1
+            }}
+          >
+            {/* Google G Logo SVG */}
+            <svg width="20" height="20" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
+          </button>
 
           {/* Divider */}
           <div style={{
