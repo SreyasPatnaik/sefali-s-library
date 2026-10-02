@@ -276,12 +276,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const handleGoogleLogin = async (credentialPayload: { credential?: string; email?: string; name?: string; picture?: string }) => {
     try {
-      const res = await api.googleLogin(credentialPayload);
+      const isAdminSession = checkIsAdminUrl();
+      const res = await api.googleLogin({ ...credentialPayload, forAdmin: isAdminSession });
+      
+      if (res.user.role === 'admin' && !isAdminSession) {
+        localStorage.removeItem('sefali_token');
+        setUser(null);
+        throw new Error('This is an administrator account. Please log in via the designated Admin Portal (/.admin).');
+      }
+
       localStorage.setItem('sefali_token', res.token);
       setUser(res.user);
       setAuthModalOpen(false);
 
-      if (res.user.role === 'admin' && checkIsAdminUrl()) {
+      if (res.user.role === 'admin' && isAdminSession) {
         setActiveMode('admin');
         setActiveTab('catalog');
         await refreshAdminStats();

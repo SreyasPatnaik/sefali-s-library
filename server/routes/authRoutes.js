@@ -146,15 +146,20 @@ router.post('/google', async (req, res) => {
     let name = directName;
     let avatar = picture || '';
 
-    // If credential JWT from Google Identity Services is provided, decode payload
+    // If credential JWT from Google / Firebase Identity is provided, decode payload
     if (credential && typeof credential === 'string') {
       try {
         const parts = credential.split('.');
         if (parts.length === 3) {
-          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+          const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const payload = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
           if (payload.email) email = payload.email;
           if (payload.name) name = payload.name;
+          else if (payload.displayName) name = payload.displayName;
+          else if (payload.given_name) name = payload.given_name + (payload.family_name ? ' ' + payload.family_name : '');
+          
           if (payload.picture) avatar = payload.picture;
+          else if (payload.photoURL) avatar = payload.photoURL;
         }
       } catch (decodeErr) {
         console.warn('Google credential decode error:', decodeErr.message);
@@ -169,6 +174,12 @@ router.post('/google', async (req, res) => {
     name = name || email.split('@')[0] || 'Studio Customer';
 
     let user = await User.findOne({ email }).populate('purchasedBooks');
+
+    if (user && user.role === 'admin' && !req.body.forAdmin) {
+      return res.status(403).json({
+        message: 'This is an administrator account. Please log in via the designated Admin Portal (/.admin).'
+      });
+    }
 
     if (!user) {
       // Create new customer account with Google credentials

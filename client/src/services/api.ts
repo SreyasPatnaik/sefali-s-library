@@ -53,7 +53,7 @@ export const api = {
     return res.json();
   },
 
-  async googleLogin(credentialPayload: { credential?: string; email?: string; name?: string; picture?: string }): Promise<{ token: string; user: User }> {
+  async googleLogin(credentialPayload: { credential?: string; email?: string; name?: string; picture?: string; forAdmin?: boolean }): Promise<{ token: string; user: User }> {
     const res = await fetch(`${API_BASE}/auth/google`, {
       method: 'POST',
       headers: getHeaders(),
