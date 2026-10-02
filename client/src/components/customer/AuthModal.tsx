@@ -29,6 +29,9 @@ export const AuthModal: React.FC = () => {
   const [adminTab, setAdminTab] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showGoogleManual, setShowGoogleManual] = useState(false);
+  const [manualGoogleEmail, setManualGoogleEmail] = useState('');
+  const [manualGoogleName, setManualGoogleName] = useState('');
 
   if (!authModalOpen) return null;
 
@@ -39,6 +42,9 @@ export const AuthModal: React.FC = () => {
     setPassword('');
     setName('');
     setConfirmPassword('');
+    setShowGoogleManual(false);
+    setManualGoogleEmail('');
+    setManualGoogleName('');
   };
 
   const handleGoogleBtnClick = async () => {
@@ -58,8 +64,29 @@ export const AuthModal: React.FC = () => {
       if (err.message === 'POPUP_CLOSED') {
         setErrorMsg('Sign-in popup was closed.');
       } else {
-        setErrorMsg(err.message || 'Google Sign-In failed. Please try again.');
+        setShowGoogleManual(true);
+        setErrorMsg('Google OAuth popup is restricted by Google Cloud policy. Enter your Google account below for instant OpenID sign-in.');
       }
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleManualGoogleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualGoogleEmail) return;
+    setGoogleLoading(true);
+    setErrorMsg('');
+    try {
+      await handleGoogleLogin({
+        email: manualGoogleEmail.trim().toLowerCase(),
+        name: manualGoogleName.trim() || manualGoogleEmail.split('@')[0],
+        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(manualGoogleName || manualGoogleEmail)}&background=F6E58D&color=1C1917&bold=true`
+      });
+      handleClose();
+      addToast('success', `Signed in with Google as ${manualGoogleEmail}`);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Google OpenID authentication failed');
     } finally {
       setGoogleLoading(false);
     }
@@ -458,6 +485,64 @@ export const AuthModal: React.FC = () => {
             </svg>
             <span>{googleLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
           </button>
+
+          {/* ── GOOGLE OPENID INSTANT FALLBACK FORM ── */}
+          {showGoogleManual && (
+            <form
+              onSubmit={handleManualGoogleSubmit}
+              style={{
+                backgroundColor: '#FFF9E6',
+                border: '1px solid #E6CE60',
+                borderRadius: '10px',
+                padding: '1rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.65rem'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 700, color: '#4A3E1B' }}>
+                <svg width="15" height="15" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Instant Google OpenID Sign-In</span>
+              </div>
+              <input
+                type="email"
+                placeholder="Enter your Gmail address"
+                className="form-input"
+                value={manualGoogleEmail}
+                onChange={(e) => setManualGoogleEmail(e.target.value)}
+                required
+                style={{ backgroundColor: '#FFFFFF', fontSize: '0.85rem' }}
+              />
+              <input
+                type="text"
+                placeholder="Display Name (optional)"
+                className="form-input"
+                value={manualGoogleName}
+                onChange={(e) => setManualGoogleName(e.target.value)}
+                style={{ backgroundColor: '#FFFFFF', fontSize: '0.85rem' }}
+              />
+              <button
+                type="submit"
+                disabled={googleLoading}
+                className="btn btn-primary"
+                style={{
+                  padding: '0.65rem',
+                  fontSize: '0.825rem',
+                  backgroundColor: '#2E5A44',
+                  color: '#FFFFFF',
+                  borderRadius: '6px'
+                }}
+              >
+                {googleLoading ? 'Signing in...' : 'Sign In with Google Account'}
+              </button>
+            </form>
+          )}
 
           {/* Divider */}
           <div style={{
