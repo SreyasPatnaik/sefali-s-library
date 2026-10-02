@@ -50,32 +50,41 @@ export const AuthModal: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    if (authModalOpen && !isAdminUrl && googleBtnRef.current) {
-      renderGoogleSignInButton(
-        googleBtnRef.current,
-        async (profile: GoogleUserProfile) => {
-          if (!isMounted) return;
-          setGoogleLoading(true);
-          setErrorMsg('');
-          try {
-            await handleGoogleLogin({
-              email: profile.email,
-              name: profile.name,
-              picture: profile.picture,
-              credential: profile.credential
-            });
-            handleClose();
-            addToast('success', `Signed in as ${profile.name}`);
-          } catch (err: any) {
-            setErrorMsg(err.message || 'Google Sign-In failed');
-          } finally {
-            if (isMounted) setGoogleLoading(false);
-          }
-        },
-        (err) => {
-          console.warn('Google Sign-In initialization:', err);
+    if (authModalOpen && !isAdminUrl) {
+      const timer = setTimeout(() => {
+        if (googleBtnRef.current && isMounted) {
+          renderGoogleSignInButton(
+            googleBtnRef.current,
+            async (profile: GoogleUserProfile) => {
+              if (!isMounted) return;
+              setGoogleLoading(true);
+              setErrorMsg('');
+              try {
+                await handleGoogleLogin({
+                  email: profile.email,
+                  name: profile.name,
+                  picture: profile.picture,
+                  credential: profile.credential
+                });
+                handleClose();
+                addToast('success', `Signed in as ${profile.name}`);
+              } catch (err: any) {
+                setErrorMsg(err.message || 'Google Sign-In failed');
+              } finally {
+                if (isMounted) setGoogleLoading(false);
+              }
+            },
+            (err) => {
+              console.warn('Google Sign-In initialization:', err);
+            }
+          );
         }
-      );
+      }, 50);
+
+      return () => {
+        clearTimeout(timer);
+        isMounted = false;
+      };
     }
     return () => {
       isMounted = false;
@@ -446,7 +455,7 @@ export const AuthModal: React.FC = () => {
 
           {/* ── GOOGLE SIGN IN OFFICIAL BUTTON ── */}
           <div style={{ width: '100%', marginBottom: '1.25rem' }}>
-            {googleLoading ? (
+            {googleLoading && (
               <div style={{
                 padding: '0.8rem',
                 borderRadius: '8px',
@@ -454,21 +463,21 @@ export const AuthModal: React.FC = () => {
                 border: '1px solid #E7E3D4',
                 textAlign: 'center',
                 fontSize: '0.85rem',
-                color: '#57534E'
+                color: '#57534E',
+                marginBottom: '0.5rem'
               }}>
                 Signing in with Google...
               </div>
-            ) : (
-              <div
-                ref={googleBtnRef}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  minHeight: '44px'
-                }}
-              />
             )}
+            <div
+              ref={googleBtnRef}
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                minHeight: '44px'
+              }}
+            />
           </div>
 
           {/* Divider */}

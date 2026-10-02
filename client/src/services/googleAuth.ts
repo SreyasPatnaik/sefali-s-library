@@ -40,121 +40,78 @@ export const decodeGoogleJwt = (token: string): any => {
 };
 
 /**
- * Waits for Google Identity Services script (window.google.accounts.id) to be ready
- */
-export const waitForGoogleGIS = (timeoutMs: number = 4000): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    if ((window as any).google?.accounts?.id) {
-      resolve((window as any).google.accounts.id);
-      return;
-    }
-
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      if ((window as any).google?.accounts?.id) {
-        clearInterval(interval);
-        resolve((window as any).google.accounts.id);
-      } else if (Date.now() - startTime > timeoutMs) {
-        clearInterval(interval);
-        reject(new Error('GOOGLE_GIS_NOT_LOADED'));
-      }
-    }, 100);
-  });
-};
-
-/**
  * Initializes Google Identity and renders official Google button into a container element
  */
-export const renderGoogleSignInButton = async (
+export const renderGoogleSignInButton = (
   containerElement: HTMLElement,
   onSuccess: (profile: GoogleUserProfile) => void,
   onError?: (err: any) => void
-): Promise<void> => {
+): void => {
   const clientId = getGoogleClientId();
   if (!clientId) {
     if (onError) onError(new Error('NO_CLIENT_ID'));
     return;
   }
 
-  try {
-    const googleAccountsId = await waitForGoogleGIS();
+  const tryRender = () => {
+    const googleAccountsId = (window as any).google?.accounts?.id;
+    if (!googleAccountsId) {
+      return false;
+    }
 
-    googleAccountsId.initialize({
-      client_id: clientId,
-      callback: (response: any) => {
-        if (!response.credential) {
-          if (onError) onError(new Error('No Google credential returned'));
-          return;
-        }
+    try {
+      googleAccountsId.initialize({
+        client_id: clientId,
+        callback: (response: any) => {
+          if (!response.credential) {
+            if (onError) onError(new Error('No Google credential returned'));
+            return;
+          }
 
-        const payload = decodeGoogleJwt(response.credential);
-        if (!payload || !payload.email) {
-          if (onError) onError(new Error('Invalid Google credential payload'));
-          return;
-        }
+          const payload = decodeGoogleJwt(response.credential);
+          if (!payload || !payload.email) {
+            if (onError) onError(new Error('Invalid Google credential payload'));
+            return;
+          }
 
-        onSuccess({
-          email: payload.email,
-          name: payload.name || payload.email.split('@')[0] || 'Studio Customer',
-          picture: payload.picture || '',
-          sub: payload.sub || payload.email,
-          credential: response.credential
-        });
-      },
-      auto_select: false,
-      cancel_on_tap_outside: true
-    });
-
-    // Clear previous renders if any
-    containerElement.innerHTML = '';
-
-    googleAccountsId.renderButton(containerElement, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'large',
-      text: 'continue_with',
-      shape: 'rectangular',
-      logo_alignment: 'left',
-      width: containerElement.clientWidth || 360
-    });
-  } catch (err) {
-    console.warn('Google button render error:', err);
-    if (onError) onError(err);
-  }
-};
-
-/**
- * Fallback prompt if user clicks custom button
- */
-export const promptGoogleOneTap = async (
-  onSuccess: (profile: GoogleUserProfile) => void,
-  onError?: (err: any) => void
-): Promise<void> => {
-  const clientId = getGoogleClientId();
-  try {
-    const googleAccountsId = await waitForGoogleGIS();
-    googleAccountsId.initialize({
-      client_id: clientId,
-      callback: (response: any) => {
-        const payload = decodeGoogleJwt(response.credential);
-        if (payload && payload.email) {
           onSuccess({
             email: payload.email,
-            name: payload.name || payload.email.split('@')[0],
+            name: payload.name || payload.email.split('@')[0] || 'Studio Customer',
             picture: payload.picture || '',
             sub: payload.sub || payload.email,
             credential: response.credential
           });
-        }
+        },
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      containerElement.innerHTML = '';
+
+      googleAccountsId.renderButton(containerElement, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+        width: 340
+      });
+      return true;
+    } catch (err) {
+      console.warn('Google button render exception:', err);
+      return false;
+    }
+  };
+
+  if (!tryRender()) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (tryRender() || attempts > 20) {
+        clearInterval(interval);
       }
-    });
-    googleAccountsId.prompt((notification: any) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        if (onError) onError(new Error('ONE_TAP_UNAVAILABLE'));
-      }
-    });
-  } catch (err) {
-    if (onError) onError(err);
+    }, 150);
   }
 };
 
