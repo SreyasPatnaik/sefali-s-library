@@ -35,8 +35,6 @@ export const AuthModal: React.FC = () => {
   const [adminTab, setAdminTab] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const googleConfigured = isGoogleAuthConfigured();
-  const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   if (!authModalOpen) return null;
 
@@ -50,10 +48,6 @@ export const AuthModal: React.FC = () => {
   };
 
   const handleGoogleBtnClick = async () => {
-    if (!googleConfigured) {
-      setErrorMsg('Google Sign-In is not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.');
-      return;
-    }
     setGoogleLoading(true);
     setErrorMsg('');
     try {
@@ -456,7 +450,7 @@ export const AuthModal: React.FC = () => {
               gap: '0.85rem',
               backgroundColor: '#FFFFFF',
               color: '#1C1917',
-              border: `1px solid ${googleConfigured ? '#D6D3CA' : '#FCA5A5'}`,
+              border: '1px solid #D6D3CA',
               borderRadius: '10px',
               padding: '0.8rem 1rem',
               fontSize: '0.92rem',
@@ -464,7 +458,7 @@ export const AuthModal: React.FC = () => {
               cursor: googleLoading ? 'wait' : 'pointer',
               boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
               transition: 'all 0.2s ease',
-              marginBottom: googleConfigured ? '1.25rem' : '0.5rem',
+              marginBottom: '1.25rem',
               opacity: googleLoading ? 0.8 : 1
             }}
           >
@@ -477,30 +471,6 @@ export const AuthModal: React.FC = () => {
             </svg>
             <span>{googleLoading ? 'Signing in with Google...' : 'Continue with Google'}</span>
           </button>
-
-          {/* Setup hint when VITE_GOOGLE_CLIENT_ID is not set */}
-          {!googleConfigured && (
-            <div style={{
-              fontSize: '0.72rem',
-              color: '#B45309',
-              backgroundColor: '#FEF3C7',
-              border: '1px solid #FDE68A',
-              borderRadius: '6px',
-              padding: '0.5rem 0.75rem',
-              marginBottom: '1.25rem',
-              lineHeight: 1.5
-            }}>
-              ⚠️ Add <strong>VITE_GOOGLE_CLIENT_ID</strong> to <code>client/.env</code> to enable real Google Sign-In.{' '}
-              <a
-                href="https://console.cloud.google.com/apis/credentials"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#92400E', textDecoration: 'underline' }}
-              >
-                Get your Client ID →
-              </a>
-            </div>
-          )}
 
           {/* Divider */}
           <div style={{

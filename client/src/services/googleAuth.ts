@@ -1,13 +1,5 @@
 /**
  * Google OAuth 2.0 Sign-In using Google Identity Services (GIS)
- *
- * Setup (one-time):
- *  1. Go to https://console.cloud.google.com → APIs & Services → Credentials
- *  2. Create OAuth 2.0 Client ID → Web application
- *  3. Add Authorized JS origin: http://localhost:5173 (and your production URL)
- *  4. Copy the Client ID and add to client/.env:
- *       VITE_GOOGLE_CLIENT_ID=XXXXXXXXXX.apps.googleusercontent.com
- *  5. Restart dev server — Google Sign-In will work automatically.
  */
 
 export interface GoogleUserProfile {
@@ -17,25 +9,45 @@ export interface GoogleUserProfile {
   sub: string; // Google's unique user ID
 }
 
+export const DEFAULT_GOOGLE_CLIENT_ID = '923229991059-7lolb3vtcoiqp0298arum249b8ie1t6q.apps.googleusercontent.com';
+
+export const getGoogleClientId = (): string => {
+  return import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID;
+};
+
+const waitForGoogleGIS = (timeoutMs: number = 3500): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    if ((window as any).google?.accounts?.oauth2) {
+      resolve((window as any).google);
+      return;
+    }
+
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      if ((window as any).google?.accounts?.oauth2) {
+        clearInterval(interval);
+        resolve((window as any).google);
+      } else if (Date.now() - startTime > timeoutMs) {
+        clearInterval(interval);
+        reject(new Error('GOOGLE_GIS_NOT_LOADED'));
+      }
+    }, 100);
+  });
+};
+
 /**
  * Opens the real Google account chooser popup and returns the user's profile.
- * Requires VITE_GOOGLE_CLIENT_ID to be set in .env
  */
-export const signInWithGoogle = (): Promise<GoogleUserProfile> => {
+export const signInWithGoogle = async (): Promise<GoogleUserProfile> => {
+  const clientId = getGoogleClientId();
+
+  if (!clientId) {
+    throw new Error('NO_CLIENT_ID');
+  }
+
+  const google = await waitForGoogleGIS();
+
   return new Promise((resolve, reject) => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-    if (!clientId) {
-      reject(new Error('NO_CLIENT_ID'));
-      return;
-    }
-
-    const google = (window as any).google;
-    if (!google?.accounts?.oauth2) {
-      reject(new Error('GOOGLE_GIS_NOT_LOADED'));
-      return;
-    }
-
     const client = google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: 'openid email profile',
@@ -82,5 +94,5 @@ export const signInWithGoogle = (): Promise<GoogleUserProfile> => {
 };
 
 export const isGoogleAuthConfigured = (): boolean => {
-  return !!import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  return !!getGoogleClientId();
 };
