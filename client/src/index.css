@@ -214,6 +214,23 @@ h1, h2, h3, h4, .font-serif {
 .delay-800  { animation-delay: 0.8s; }
 
 /* ===================================
+   HERO SPLIT GRID (Side-by-Side Desktop Layout)
+   =================================== */
+
+.hero-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .hero-split-grid {
+    grid-template-columns: 1.12fr 0.88fr !important;
+    align-items: stretch;
+  }
+}
+
+/* ===================================
    3D BOOK COMPONENT
    =================================== */
 

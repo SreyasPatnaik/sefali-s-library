@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Eye, EyeOff, ShieldCheck, ArrowLeft, Mail, User as UserIcon, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
+import { signInWithGoogleFirebase } from '../../services/firebase';
 
 declare global {
   interface Window {
@@ -88,22 +89,32 @@ export const AuthModal: React.FC = () => {
     setShowGoogleAccountDialog(false);
   };
 
-  const handleGoogleBtnClick = () => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-
-    if (window.google?.accounts?.id && googleClientId) {
-      try {
-        window.google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            setShowGoogleAccountDialog(true);
-          }
+  const handleGoogleBtnClick = async () => {
+    setGoogleLoading(true);
+    setErrorMsg('');
+    try {
+      // Real OpenID Connect login via Firebase Authentication
+      const firebaseRes = await signInWithGoogleFirebase();
+      if (firebaseRes?.email) {
+        await handleGoogleLogin({
+          credential: firebaseRes.idToken,
+          email: firebaseRes.email,
+          name: firebaseRes.name,
+          picture: firebaseRes.picture
         });
+        handleClose();
+        addToast('success', `Signed in as ${firebaseRes.name} via Google OpenID`);
         return;
-      } catch {
+      }
+    } catch (firebaseErr: any) {
+      console.warn('Firebase OpenID login info:', firebaseErr);
+      if (firebaseErr?.code === 'auth/popup-closed-by-user') {
+        setErrorMsg('Sign-in popup was closed.');
+      } else {
         setShowGoogleAccountDialog(true);
       }
-    } else {
-      setShowGoogleAccountDialog(true);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
