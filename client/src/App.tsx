@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Storefront } from './components/customer/Storefront';
@@ -9,6 +9,7 @@ import { UserShelf } from './components/customer/UserShelf';
 import { ExecutiveDashboard } from './components/admin/ExecutiveDashboard';
 import { CatalogControl } from './components/admin/CatalogControl';
 import { OrderTracking } from './components/admin/OrderTracking';
+import { SplashScreen } from './components/common/SplashScreen';
 
 const MainContent: React.FC = () => {
   const { activeMode, setActiveMode, activeTab, user } = useApp();
@@ -55,11 +56,15 @@ const MainContent: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <AppProvider>
-      <div style={{ backgroundColor: '#FAF7EE', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Header />
-        <MainContent />
+    <>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <AppProvider>
+        <div style={{ backgroundColor: '#FAF7EE', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <Header />
+          <MainContent />
 
         {/* Studio Footer */}
         <footer style={{
@@ -101,6 +106,7 @@ export const App: React.FC = () => {
         </footer>
       </div>
     </AppProvider>
+    </>
   );
 };
 

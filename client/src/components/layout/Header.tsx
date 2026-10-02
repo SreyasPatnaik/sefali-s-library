@@ -84,24 +84,20 @@ export const Header: React.FC = () => {
             className="brand-logo-container"
             style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer', flexShrink: 0 }}
           >
-            <div className="brand-crest-pill" style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #2E5A44 0%, #1C382A 100%)',
-              color: '#FAF7EE',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              fontFamily: 'var(--font-serif)',
-              border: '1px solid rgba(246, 229, 141, 0.4)',
-              boxShadow: '0 2px 8px rgba(46, 90, 68, 0.25)',
-              flexShrink: 0
-            }}>
-              S
-            </div>
+            <img
+              src="/hastha-logo.png"
+              alt="The Hastha Crest"
+              className="brand-crest-pill"
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                objectFit: 'cover',
+                border: '1px solid rgba(184, 142, 40, 0.3)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                flexShrink: 0
+              }}
+            />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span className="brand-title-text" style={{
                 fontFamily: 'var(--font-sans)',

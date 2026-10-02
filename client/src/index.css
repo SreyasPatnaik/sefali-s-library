@@ -1314,5 +1314,304 @@ body.modal-open { overflow: hidden; }
   }
 }
 
+/* ===================================
+   LUXURY SPLASH SCREEN & COVER ANIMATION
+   =================================== */
 
+.splash-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #FAF4DC;
+  background: radial-gradient(circle at center, #FFF9E6 0%, #F6E69D 60%, #E8D374 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s ease;
+  user-select: none;
+}
 
+.splash-wrapper.splash-exit {
+  opacity: 0;
+  transform: scale(1.04);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* Ambient Ambient Light Orbs */
+.splash-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  opacity: 0.6;
+  animation: floatSlow 8s ease-in-out infinite alternate;
+}
+
+.splash-orb-1 {
+  width: 450px;
+  height: 450px;
+  background: rgba(246, 229, 141, 0.7);
+  top: -10%;
+  left: -10%;
+}
+
+.splash-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: rgba(212, 175, 55, 0.35);
+  bottom: -15%;
+  right: -10%;
+  animation-duration: 10s;
+}
+
+.splash-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: rgba(184, 142, 40, 0.25);
+  top: 40%;
+  left: 60%;
+  animation-duration: 7s;
+}
+
+.splash-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 520px;
+  width: 90%;
+  animation: splashFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Emblem Container with Pulsing Halo */
+.splash-logo-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.splash-logo-image {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 28px;
+  box-shadow: 0 16px 45px rgba(184, 142, 40, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 3;
+  animation: splashFloat 4s ease-in-out infinite alternate;
+}
+
+.splash-aura {
+  position: absolute;
+  inset: -12px;
+  border-radius: 36px;
+  background: radial-gradient(circle, rgba(230, 206, 96, 0.8) 0%, rgba(246, 229, 141, 0) 70%);
+  filter: blur(14px);
+  z-index: 1;
+  animation: splashPulse 2.5s ease-in-out infinite;
+}
+
+.splash-ripple {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  border: 2px solid rgba(184, 142, 40, 0.4);
+  opacity: 0;
+  z-index: 1;
+  animation: splashRipple 2.8s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+}
+
+.splash-ripple-delayed {
+  animation-delay: 1.4s;
+}
+
+/* Typography */
+.splash-header {
+  margin-bottom: 2.25rem;
+}
+
+.splash-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #1C1917;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  text-shadow: 0 2px 10px rgba(246, 229, 141, 0.5);
+}
+
+.splash-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #6B5B3E;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.splash-quote {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: #44403C;
+  max-width: 380px;
+  line-height: 1.5;
+  margin: 0 auto;
+}
+
+/* Loading Box & Shimmer Bar */
+.splash-loader-box {
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 1.75rem;
+}
+
+.splash-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(28, 25, 23, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.splash-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2E5A44 0%, #B88E28 50%, #2E5A44 100%);
+  background-size: 200% 100%;
+  border-radius: 99px;
+  transition: width 0.1s ease-out;
+  animation: shimmerSweep 2s linear infinite;
+  box-shadow: 0 0 10px rgba(184, 142, 40, 0.5);
+}
+
+.splash-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #57534E;
+}
+
+.splash-status-text {
+  font-style: italic;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: #2E5A44;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.splash-percentage {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #1C1917;
+  font-feature-settings: "tnum";
+  letter-spacing: 0.05em;
+}
+
+/* Skip prompt button */
+.splash-enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(28, 25, 23, 0.12);
+  backdrop-filter: blur(8px);
+  padding: 0.45rem 1.1rem;
+  border-radius: 99px;
+  color: #57534E;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.splash-enter-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1C1917;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Keyframes for Splash Screen */
+@keyframes splashFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes splashFloat {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@keyframes splashPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes splashRipple {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@media (max-width: 640px) {
+  .splash-logo-container {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 1.5rem;
+  }
+  .splash-logo-image {
+    width: 125px;
+    height: 125px;
+    border-radius: 22px;
+  }
+  .splash-title {
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+  }
+  .splash-quote {
+    font-size: 0.95rem;
+  }
+}
