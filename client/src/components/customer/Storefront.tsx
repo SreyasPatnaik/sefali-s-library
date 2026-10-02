@@ -349,121 +349,71 @@ export const Storefront: React.FC = () => {
                 {/* THE SHEFALIS SPACE - Grand 3D Studio Emblem */}
                 <div className="medallion-3d" style={{
                   width: '100%',
-                  borderRadius: '16px',
+                  borderRadius: '20px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  padding: '1.1rem 1rem',
-                  marginBottom: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.7)',
+                  padding: '2rem 1.5rem',
+                  border: '1px solid rgba(255, 255, 255, 0.8)',
                   transform: isDesktop
                     ? `translate3d(${mousePos.x * 8}px, ${mousePos.y * 8}px, 35px)`
                     : 'none',
                   transition: 'transform 0.12s ease'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '2px' }}>
-                    <Sparkles size={11} color="#4A3E1B" />
-                    <span style={{ fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.22em', color: '#38332A', textTransform: 'uppercase' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '6px' }}>
+                    <Sparkles size={12} color="#4A3E1B" />
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.22em', color: '#38332A', textTransform: 'uppercase' }}>
                       ATELIER EST. 2026
                     </span>
-                    <Sparkles size={11} color="#4A3E1B" />
+                    <Sparkles size={12} color="#4A3E1B" />
                   </div>
                   
                   <span className="font-editorial" style={{
-                    fontSize: '1.65rem',
+                    fontSize: 'clamp(1.75rem, 3.5vw, 2.2rem)',
                     fontWeight: 800,
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.12em',
                     color: '#1C1917',
                     textTransform: 'uppercase',
-                    lineHeight: 1.1,
-                    textShadow: '0 1px 2px rgba(255,255,255,0.6)'
+                    lineHeight: 1.15,
+                    textShadow: '0 1px 2px rgba(255,255,255,0.7)',
+                    margin: '0.35rem 0'
                   }}>
                     THE SHEFALIS SPACE
                   </span>
 
                   <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.18em',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.2em',
                     color: '#4A3E1B',
                     textTransform: 'uppercase',
-                    marginTop: '3px'
+                    marginTop: '4px'
                   }}>
-                    CONTEMPORARY ART & BESPOKE DESIGN
+                    CONTEMPORARY ART & BESPOKE LIVING
                   </span>
+
+                  <div style={{ width: '48px', height: '1.5px', backgroundColor: 'rgba(74, 62, 27, 0.35)', margin: '1rem 0' }} />
+
+                  <p className="font-serif" style={{ fontSize: '0.95rem', fontStyle: 'italic', color: '#38332A', margin: 0, lineHeight: 1.5, maxWidth: '280px' }}>
+                    "Every piece is an intimate dialogue between clay, texture, and meditative soul."
+                  </p>
                 </div>
 
-                {/* Featured Studio Piece Card */}
-                <div style={{
-                  width: '100%',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '14px',
-                  padding: '0.75rem',
-                  border: '1px solid #EAE5D4',
-                  boxShadow: '0 4px 16px rgba(28, 25, 23, 0.05)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.85rem',
-                  position: 'relative'
-                }}>
-                  <div style={{ position: 'relative', width: '70px', height: '70px', flexShrink: 0, borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FAF7EE' }}>
-                    <img
-                      src={products[0]?.coverImage || products[0]?.images?.[0] || 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&q=80&w=300'}
-                      alt="The Shefalis Space Signature Collection"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <div style={{ position: 'absolute', top: 2, right: 2, backgroundColor: '#1C1917', color: '#F6E58D', fontSize: '0.55rem', fontWeight: 800, padding: '1px 4px', borderRadius: '3px' }}>
-                      NEW
-                    </div>
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: '#B88E28', fontWeight: 700 }}>
-                      <span>★ 4.9</span>
-                      <span style={{ color: '#78716C', fontWeight: 500 }}>• Studio Pick</span>
-                    </div>
-                    <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {products[0]?.title || 'Earth & Soul Ceramic Vase'}
-                    </h4>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
-                      <span style={{ fontSize: '0.825rem', fontWeight: 800, color: '#2E5A44' }}>
-                        ₹{products[0]?.price || 2499}
-                      </span>
-                      <button
-                        onClick={() => products[0] && addToCart(products[0])}
-                        style={{
-                          background: '#1C1917',
-                          color: '#FAF7EE',
-                          border: 'none',
-                          borderRadius: '20px',
-                          padding: '0.25rem 0.65rem',
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}
-                      >
-                        <ShoppingBag size={10} /> + Bag
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Micro Guarantee Badges */}
+                {/* Studio Trust Credentials */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   width: '100%',
-                  marginTop: '0.85rem',
-                  padding: '0 0.25rem',
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  color: '#4A3E1B'
+                  marginTop: '0.5rem',
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  color: '#4A3E1B',
+                  textTransform: 'uppercase'
                 }}>
                   <span>✦ 100% Handcrafted</span>
                   <span>•</span>
