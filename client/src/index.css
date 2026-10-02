@@ -42,7 +42,7 @@
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
   margin: 0;
   padding: 0;
@@ -52,7 +52,7 @@ html, body {
 #root, main {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 

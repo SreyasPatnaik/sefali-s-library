@@ -290,7 +290,7 @@ export const Storefront: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Side: Architectural Arch Motif & 3D Parallax Golden Sun Emblem */}
+          {/* Right Side: THE SHEFALIS SPACE Studio Showcase & Atelier Pavilion */}
           <div style={{
             backgroundColor: '#F6E58D',
             display: 'flex',
@@ -305,79 +305,172 @@ export const Storefront: React.FC = () => {
             transition: 'transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1)',
             willChange: 'transform'
           }}>
-            <div style={{
-              width: 'min(280px, 80vw)',
-              height: 'min(360px, 100vw)',
-              borderTopLeftRadius: '140px',
-              borderTopRightRadius: '140px',
-              border: '1px solid rgba(28, 25, 23, 0.25)',
+            <div className="hero-showcase-pavilion" style={{
+              width: '100%',
+              maxWidth: '380px',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
               position: 'relative',
-              backgroundColor: 'rgba(255,255,255,0.18)',
-              backdropFilter: 'blur(6px)',
-              boxShadow: isDesktop
-                ? `${-mousePos.x * 20}px ${-mousePos.y * 20 + 12}px 32px rgba(28, 25, 23, 0.08)`
-                : '0 8px 24px rgba(0,0,0,0.04)',
-              transition: 'box-shadow 0.15s ease'
+              gap: '1.25rem'
             }}>
-              {/* Floating Orbit Rings */}
+              {/* Grand Architectural Arch Framework */}
               <div style={{
-                position: 'absolute',
-                width: '110%',
-                height: '110%',
-                borderRadius: '50%',
-                border: '1px dashed rgba(28, 25, 23, 0.18)',
-                transform: `rotate(${scrollY * 0.08}deg)`,
-                pointerEvents: 'none',
-                willChange: 'transform'
-              }} />
-
-              {/* Central Gold Medallion with 3D Depth */}
-              <div className="medallion-3d" style={{
-                width: 'min(170px, 50vw)',
-                height: 'min(170px, 50vw)',
-                borderRadius: '50%',
+                width: '100%',
+                borderRadius: '24px 24px 20px 20px',
+                border: '1px solid rgba(28, 25, 23, 0.18)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                padding: '1rem',
-                transform: isDesktop
-                  ? `translate3d(${mousePos.x * 12}px, ${mousePos.y * 12}px, 40px)`
-                  : 'none',
-                transition: 'transform 0.12s ease'
+                position: 'relative',
+                backgroundColor: 'rgba(255,255,255,0.4)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                padding: '1.5rem 1.25rem 1.25rem 1.25rem',
+                boxShadow: isDesktop
+                  ? `${-mousePos.x * 20}px ${-mousePos.y * 20 + 16}px 36px rgba(28, 25, 23, 0.09)`
+                  : '0 10px 30px rgba(0,0,0,0.06)',
+                transition: 'box-shadow 0.15s ease'
               }}>
-                <span className="font-editorial" style={{
-                  fontSize: '0.8rem',
-                  letterSpacing: '0.2em',
-                  color: '#1C1917',
-                  textTransform: 'uppercase',
-                  lineHeight: 1.2
+                {/* Floating Orbit Ring */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-15px',
+                  right: '-15px',
+                  width: '90px',
+                  height: '90px',
+                  borderRadius: '50%',
+                  border: '1px dashed rgba(184, 142, 40, 0.4)',
+                  transform: `rotate(${scrollY * 0.1}deg)`,
+                  pointerEvents: 'none',
+                  willChange: 'transform'
+                }} />
+
+                {/* THE SHEFALIS SPACE - Grand 3D Studio Emblem */}
+                <div className="medallion-3d" style={{
+                  width: '100%',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  padding: '1.1rem 1rem',
+                  marginBottom: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.7)',
+                  transform: isDesktop
+                    ? `translate3d(${mousePos.x * 8}px, ${mousePos.y * 8}px, 35px)`
+                    : 'none',
+                  transition: 'transform 0.12s ease'
                 }}>
-                  THE
-                </span>
-                <span className="font-editorial" style={{
-                  fontSize: '1.2rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  color: '#1C1917',
-                  textTransform: 'uppercase',
-                  lineHeight: 1.2
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '2px' }}>
+                    <Sparkles size={11} color="#4A3E1B" />
+                    <span style={{ fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.22em', color: '#38332A', textTransform: 'uppercase' }}>
+                      ATELIER EST. 2026
+                    </span>
+                    <Sparkles size={11} color="#4A3E1B" />
+                  </div>
+                  
+                  <span className="font-editorial" style={{
+                    fontSize: '1.65rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.1em',
+                    color: '#1C1917',
+                    textTransform: 'uppercase',
+                    lineHeight: 1.1,
+                    textShadow: '0 1px 2px rgba(255,255,255,0.6)'
+                  }}>
+                    THE SHEFALIS SPACE
+                  </span>
+
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.18em',
+                    color: '#4A3E1B',
+                    textTransform: 'uppercase',
+                    marginTop: '3px'
+                  }}>
+                    CONTEMPORARY ART & BESPOKE DESIGN
+                  </span>
+                </div>
+
+                {/* Featured Studio Piece Card */}
+                <div style={{
+                  width: '100%',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '14px',
+                  padding: '0.75rem',
+                  border: '1px solid #EAE5D4',
+                  boxShadow: '0 4px 16px rgba(28, 25, 23, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.85rem',
+                  position: 'relative'
                 }}>
-                  SHEFALIs
-                </span>
-                <span className="font-editorial" style={{
-                  fontSize: '0.8rem',
-                  letterSpacing: '0.2em',
-                  color: '#1C1917',
-                  textTransform: 'uppercase',
-                  lineHeight: 1.2
+                  <div style={{ position: 'relative', width: '70px', height: '70px', flexShrink: 0, borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FAF7EE' }}>
+                    <img
+                      src={products[0]?.coverImage || products[0]?.images?.[0] || 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&q=80&w=300'}
+                      alt="The Shefalis Space Signature Collection"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div style={{ position: 'absolute', top: 2, right: 2, backgroundColor: '#1C1917', color: '#F6E58D', fontSize: '0.55rem', fontWeight: 800, padding: '1px 4px', borderRadius: '3px' }}>
+                      NEW
+                    </div>
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: '#B88E28', fontWeight: 700 }}>
+                      <span>★ 4.9</span>
+                      <span style={{ color: '#78716C', fontWeight: 500 }}>• Studio Pick</span>
+                    </div>
+                    <h4 className="font-serif" style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1C1917', margin: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {products[0]?.title || 'Earth & Soul Ceramic Vase'}
+                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
+                      <span style={{ fontSize: '0.825rem', fontWeight: 800, color: '#2E5A44' }}>
+                        ₹{products[0]?.price || 2499}
+                      </span>
+                      <button
+                        onClick={() => products[0] && addToCart(products[0])}
+                        style={{
+                          background: '#1C1917',
+                          color: '#FAF7EE',
+                          border: 'none',
+                          borderRadius: '20px',
+                          padding: '0.25rem 0.65rem',
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}
+                      >
+                        <ShoppingBag size={10} /> + Bag
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Micro Guarantee Badges */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  marginTop: '0.85rem',
+                  padding: '0 0.25rem',
+                  fontSize: '0.65rem',
+                  fontWeight: 600,
+                  color: '#4A3E1B'
                 }}>
-                  SPACE
-                </span>
+                  <span>✦ 100% Handcrafted</span>
+                  <span>•</span>
+                  <span>✦ Insured Courier</span>
+                  <span>•</span>
+                  <span>✦ Studio Direct</span>
+                </div>
               </div>
             </div>
           </div>
