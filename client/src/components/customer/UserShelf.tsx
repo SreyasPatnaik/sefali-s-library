@@ -57,15 +57,15 @@ export const UserShelf: React.FC = () => {
         <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           STUDIO PURCHASES & TRACKING
         </span>
-        <h1 className="font-serif" style={{ fontSize: '2.5rem', fontWeight: 700, marginTop: '0.3rem', color: '#1C1917' }}>
+        <h1 className="font-serif" style={{ fontSize: 'clamp(1.6rem, 5vw, 2.5rem)', fontWeight: 700, marginTop: '0.3rem', color: '#1C1917' }}>
           My Orders & Collection
         </h1>
-        <p style={{ fontSize: '0.95rem', color: '#78716C', margin: '0.4rem 0 0 0' }}>
+        <p style={{ fontSize: '0.9rem', color: '#78716C', margin: '0.4rem 0 0 0', lineHeight: 1.5 }}>
           Welcome back, {user.name}. Here are your handcrafted pieces and studio acquisitions.
         </p>
       </div>
 
-      <div className="shelf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2rem' }}>
+      <div className="shelf-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2rem', width: '100%', boxSizing: 'border-box' }}>
         
         {/* Left Column: Orders List */}
         <div style={{
@@ -109,47 +109,49 @@ export const UserShelf: React.FC = () => {
                 return (
                   <div
                     key={item._id}
+                    className="shelf-item-card"
                     style={{
                       backgroundColor: '#FAF7EE',
                       border: '1px solid #EAE5D5',
                       borderRadius: '12px',
-                      padding: '1.5rem',
+                      padding: '1.25rem',
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       justifyContent: 'space-between',
-                      gap: '1.5rem',
-                      transition: 'all 0.2s ease'
+                      gap: '1rem',
+                      transition: 'all 0.2s ease',
+                      flexWrap: 'wrap'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', flex: 1, minWidth: 0 }}>
                       <img
                         src={item.coverImage || item.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=300'}
                         alt={item.title}
-                        style={{ width: '84px', height: '84px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5' }}
+                        style={{ width: '76px', height: '76px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #EAE5D5', flexShrink: 0 }}
                       />
 
-                      <div style={{ flex: 1 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', color: '#8C827A', letterSpacing: '0.08em' }}>
                           {item.category || item.tag}
                         </span>
-                        <h3 className="font-serif" style={{ fontSize: '1.35rem', fontWeight: 700, color: '#1C1917', margin: '0.2rem 0' }}>
+                        <h3 className="font-serif" style={{ fontSize: 'clamp(1rem, 3.5vw, 1.3rem)', fontWeight: 700, color: '#1C1917', margin: '0.2rem 0', wordBreak: 'break-word' }}>
                           {item.title}
                         </h3>
-                        <p style={{ fontSize: '0.8rem', color: '#78716C', margin: '0 0 0.5rem 0' }}>
-                          Materials: {item.materials || 'Handcrafted ceramic / linen / wood'} • ₹{item.price}
+                        <p style={{ fontSize: '0.8rem', color: '#78716C', margin: '0 0 0.5rem 0', wordBreak: 'break-word' }}>
+                          ₹{item.price} • {item.materials || 'Handcrafted piece'}
                         </p>
 
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 700, color: '#2E5A44', backgroundColor: '#E8F2EC', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
-                          <Truck size={14} /> Order Dispatched • Estimated Delivery in 2 Days
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', fontWeight: 700, color: '#2E5A44', backgroundColor: '#E8F2EC', padding: '0.25rem 0.6rem', borderRadius: '4px', flexWrap: 'wrap' }}>
+                          <Truck size={13} /> Order Dispatched • Est. 2 Days
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flexShrink: 0 }}>
+                    <div className="shelf-item-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flexShrink: 0 }}>
                       <button
                         className="btn btn-secondary"
                         onClick={() => setActiveProductForDetails(item)}
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
                       >
                         Piece Details
                       </button>

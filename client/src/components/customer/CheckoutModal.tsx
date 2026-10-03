@@ -154,7 +154,7 @@ export const CheckoutModal: React.FC = () => {
       <div
         className="modal-content animate-pop-in checkout-modal-card"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '860px', padding: 0 }}
+        style={{ maxWidth: '860px', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
       >
         {/* Header Bar */}
         <div className="checkout-header-bar" style={{
@@ -162,7 +162,9 @@ export const CheckoutModal: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           backgroundColor: '#FAF7EE',
-          borderBottom: '1px solid #EAE5D5'
+          borderBottom: '1px solid #EAE5D5',
+          padding: '1rem 1.25rem',
+          flexShrink: 0
         }}>
           <div>
             <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#A08020', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -272,7 +274,7 @@ export const CheckoutModal: React.FC = () => {
         </div>
 
         {/* Step Body */}
-        <div className="checkout-body-content">
+        <div className="checkout-body-content" style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
           
           {step === 1 && (
             <div className="animate-fade-in">

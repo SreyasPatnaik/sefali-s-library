@@ -11,16 +11,16 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onDismis
   if (toasts.length === 0) return null;
 
   return (
-    <div style={{
+    <div className="toast-container-wrap" style={{
       position: 'fixed',
       bottom: '1.5rem',
       right: '1.5rem',
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.75rem',
-      maxWidth: '380px',
-      width: '100%',
+      gap: '0.65rem',
+      maxWidth: '360px',
+      width: 'calc(100vw - 2rem)',
       pointerEvents: 'none'
     }}>
       {toasts.map(toast => {
